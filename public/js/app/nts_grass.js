@@ -57,9 +57,9 @@ let NTS_GRASS = {
         // Because there are no position vertices, we must create our own bounding sphere.
         // (Not used because we disable frustum culling)
         geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), Math.sqrt(opts.radius * opts.radius * 2.0) * 10000.0);
-        geo.addAttribute('vindex', new THREE.BufferAttribute(buffers.vindex, 1));
-        geo.addAttribute('shape', new THREE.InstancedBufferAttribute(buffers.shape, 4));
-        geo.addAttribute('offset', new THREE.InstancedBufferAttribute(buffers.offset, 4));
+        geo.setAttribute('vindex', new THREE.BufferAttribute(buffers.vindex, 1));
+        geo.setAttribute('shape', new THREE.InstancedBufferAttribute(buffers.shape, 4));
+        geo.setAttribute('offset', new THREE.InstancedBufferAttribute(buffers.offset, 4));
         geo.setIndex(new THREE.BufferAttribute(buffers.index, 1));
 
         let tex = opts.texture;

@@ -75,8 +75,8 @@ let NTS_TERRAIN = {
         var vtxBufs = this.createVtxBuffers(cellSize, xCellCount + 1, yCellCount + 1);
         var idBuf = this.createIdBuffer(xCellCount + 1, yCellCount + 1);
         var geo = new THREE.BufferGeometry();
-        geo.addAttribute('position', new THREE.BufferAttribute(vtxBufs.position, 3));
-        geo.addAttribute('uv', new THREE.BufferAttribute(vtxBufs.uv, 2));
+        geo.setAttribute('position', new THREE.BufferAttribute(vtxBufs.position, 3));
+        geo.setAttribute('uv', new THREE.BufferAttribute(vtxBufs.uv, 2));
         geo.setIndex(new THREE.BufferAttribute(idBuf, 1));
         var hscale = opts.heightMapScale;
         var fragScript = opts.fragScript.replace('%%TRANSITION_LOW%%', opts.transitionLow.toString()).replace('%%TRANSITION_HIGH%%', opts.transitionHigh.toString());

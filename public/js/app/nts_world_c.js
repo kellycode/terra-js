@@ -193,7 +193,7 @@ class NTS_WORLD_C {
 
 
         // White plane to cover screen for fullscreen fade-in from white
-        this.meshes.fade = new THREE.Mesh(new THREE.PlaneBufferGeometry(6.0, 4.0, 1, 1), new THREE.MeshBasicMaterial({
+        this.meshes.fade = new THREE.Mesh(new THREE.PlaneGeometry(6.0, 4.0, 1, 1), new THREE.MeshBasicMaterial({
             color: 0xFFFFFF, fog: false, transparent: true, opacity: 1.0,
             depthTest: false, depthWrite: false
         }));
@@ -206,7 +206,7 @@ class NTS_WORLD_C {
 
         // Bright yellow plane for sun glare using additive blending
         // to blow out the colours
-        this.meshes.sunFlare = new THREE.Mesh(new THREE.PlaneBufferGeometry(6.0, 4.0, 1, 1), new THREE.MeshBasicMaterial({
+        this.meshes.sunFlare = new THREE.Mesh(new THREE.PlaneGeometry(6.0, 4.0, 1, 1), new THREE.MeshBasicMaterial({
             color: this.vec_1.Color.to24bit(this.GLARE_COLOR), fog: false, transparent: true, opacity: 0.0,
             depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending
         }));

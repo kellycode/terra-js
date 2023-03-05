@@ -45,7 +45,7 @@ let NTS_WATER = {
             fragmentShader: opts.fragScript
         });
         
-        let mesh = new THREE.Mesh(new THREE.PlaneBufferGeometry(2000.0, 2000.0), mat);
+        let mesh = new THREE.Mesh(new THREE.PlaneGeometry(2000.0, 2000.0), mat);
         mesh.frustumCulled = false;
         
         this._time = Date.now();
