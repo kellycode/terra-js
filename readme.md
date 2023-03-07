@@ -1,13 +1,15 @@
-# terra-unTypeScriptified
+# TerraFork
 
-Fork of https://github.com/spacejack/terra
+![a 3d terrain](https://kellycode.github.io/terra-unTypeScriptified/preview.jpg)
 
-Typescript dependency/dependencies removed.  
-Organized a bit.
+From a fork of https://github.com/spacejack/terra
+
 Updated to THREE r147  
-Changed the start to keyboard controls (arrows over camera tour)
+Typescript and its dependencies removed.  
+Organized to more OOP standards.  
 
-Next Up ToDos:  
+Terra is brilliant but not particularly useful in its typescriptified state.  The grass needs to be a module that can be plugged into/onto any ground object and it should be a fairly direct process to add variety.
+
+TODOs:  
 Add a gulp builder for minification  
-Extract the grass cleverness to a more useful module
-
+Extract the grass/wind bits for easy use  
