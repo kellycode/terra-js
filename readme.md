@@ -1,6 +1,6 @@
 # TerraFork
 
-![a 3d terrain](https://kellycode.github.io/terra-unTypeScriptified/preview.jpg)
+![a 3d terrain](https://kellycode.github.io/terra-js/preview.jpg)
 
 From a fork of https://github.com/spacejack/terra
 
