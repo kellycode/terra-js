@@ -8,8 +8,7 @@ Updated to THREE r147
 Typescript and its dependencies removed.  
 Organized to more OOP standards.  
 
-Terra is brilliant but not particularly useful in its typescriptified state.  The grass needs to be a module that can be plugged into/onto any ground object and it should be a fairly direct process to add variety.
+Terra is brilliant but I prefer to avoid typescript
 
 TODOs:  
 Add a gulp builder for minification  
-Extract the grass/wind bits for easy use  
