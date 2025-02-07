@@ -252,6 +252,30 @@ class NTS_WORLD_C {
 
         this._hinfo = this.heightfield_2.HInfo();
         this._v = this.vec_1.Vec2.create(0.0, 0.0);
+
+        // Install Drone
+        setTimeout(
+            function () {
+                let gltf = assets.models["drone"];
+                let droneScene = gltf.scene;
+                this.scene.add(droneScene);
+                //this.scene.add(drone);
+                droneScene.position.set(10, 0, 95);
+                droneScene.rotation.x = Math.PI / 2;
+                droneScene.scale.set(10, 10, 10);
+
+                let mixer = new THREE.AnimationMixer(gltf);
+                const animations = gltf.animations;
+                if (animations && animations.length > 0) {
+                    const animation = animations[0];
+                    mixer.clipAction(animation).play();
+                }
+
+                const light = new THREE.AmbientLight(0xffffff); // soft white light
+                this.scene.add(light);
+            }.bind(this),
+            2000
+        );
     }
 
     // Call every frame

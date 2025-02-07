@@ -34,21 +34,22 @@ let NTS_INPUT = {
     setState: function (k, s) {
         var cs = this.state;
         // arrow keys L/R/F/B
-        if (k === 37) // left arrow
+        if (k === 37 || k === 65) // left arrow or a
             cs.left = s;
-        else if (k === 39) // right arrow
+        else if (k === 39 || k === 68) // right arrow or d
             cs.right = s;
-        else if (k === 38) // up arrow
+        else if (k === 38 || k === 87) // up arrow or w
             cs.forward = s;
-        else if (k === 40) // down arrow
+        else if (k === 40 || k === 83) // down arrow or s
             cs.back = s;
-        else if (k === 87) // W
+        else if (k === 32) // space bar (far cry 4 buzzer)
             cs.up = s;
-        else if (k === 83) // S
+        else if (k === 16) // left shift (far cry 4 buzzer)
             cs.down = s;
+        // pitchup/down only used in MODE_MAN
         else if (k === 81) // Q
             cs.pitchup = s;
-        else if (k === 65) // A
+        else if (k === 69) // E
             cs.pitchdown = s;
     },
 

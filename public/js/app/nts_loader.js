@@ -23,7 +23,7 @@ let NTS_LOADER = {
     error_callback: null,
     done_cb: null,
     
-    assets: {images: {}, text: {}, textures: {}},
+    assets: { images: {}, text: {}, textures: {}, models: {} },
     
     // Start loading a list of assets
     load: function (assetList, onAssetsLoaded, onAssetsProgress, onAssetsError, onAssetsDone) {
@@ -56,6 +56,13 @@ let NTS_LOADER = {
                 this.loadTexture(assetList.textures[i]);
             }
         }
+
+        if (assetList.models) {
+            this.totalToLoad += assetList.models.length;
+            for (let i = 0; i < assetList.models.length; ++i) {
+                this.loadGLTF(assetList.models[i]);
+            }
+        }
     },
 
     loadText: function (ad) {
@@ -85,6 +92,25 @@ let NTS_LOADER = {
         img.onload = doProgressCallback;
         img.onerror = this.doError;
         img.src = ad.url;
+    },
+
+    loadGLTF: function (ad) {
+        let assets = this.assets;
+        let doProgressCallback = this.doProgress(this);
+        const loader = new THREE.GLTFLoader();
+        loader.load(
+            ad.url,
+            function (gltf) {
+                assets.models[ad.name] = gltf;
+                console.log("Drone loaded")
+                doProgressCallback;
+                //scene.add(gltf.scene);
+            },
+            undefined,
+            function (error) {
+                console.error(error);
+            }
+        );
     },
 
     loadTexture: function (ad) {

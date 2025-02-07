@@ -290,6 +290,7 @@ class NTS_PLAYER_C {
         
         var groundHeight = Math.max(NTS_HEIGHTFIELD.heightAt(this.HEIGHTFIELD, this.state.pos.x, this.state.pos.y, true), this.WATERHEIGHT);
         
+        // Player hieght set
         if (this.state.pos.z < groundHeight + this.MIN_HEIGHT) {
             this.state.pos.z = groundHeight + this.MIN_HEIGHT;
         } else if (this.state.pos.z > this.MAX_HEIGHT) {
