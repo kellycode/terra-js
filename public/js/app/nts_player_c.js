@@ -1,4 +1,3 @@
-
 // USES:
 // NTS_GMATH
 // NTS_HEIGHTFIELD
@@ -19,9 +18,7 @@
 // Creates a Player instance
 // (User first person camera)
 class NTS_PLAYER_C {
-
-    constructor(heightField, waterHeight) {
-
+    constructor(heightField, waterHeight, world) {
         this.HEIGHTFIELD = heightField;
         this.WATERHEIGHT = waterHeight;
 
@@ -55,6 +52,7 @@ class NTS_PLAYER_C {
         this.NUM_MODES = 3;
 
         this.drone;
+        this.world = world;
 
         //let autoplay = true
         this.mode = this.MODE_FLY;
@@ -69,21 +67,24 @@ class NTS_PLAYER_C {
             pitchVel: 0.0,
             roll: 0.0,
             rollVel: 0.0,
-            floatHeight: 0.0
+            floatHeight: 0.0,
         };
 
-        NTS_INPUT.setKeyPressListener(13, function () {
-            this.nextMode();
-            if (this.mode === this.MODE_AUTO) {
-                NTS_LOGGER.hide();
-                NTS_NOTIFICATION.notify('Press ENTER to change camera');
-            } else if (this.mode === this.MODE_FLY) {
-                NTS_NOTIFICATION.notify('ARROWS drive, W/S move up/down.');
-            } else if (this.mode === this.MODE_MAN) {
-                NTS_LOGGER.show();
-                NTS_NOTIFICATION.notify('ARROWS move, W/S move up/down, Q/A look up/down');
-            }
-        }.bind(this));
+        NTS_INPUT.setKeyPressListener(
+            13,
+            function () {
+                this.nextMode();
+                if (this.mode === this.MODE_AUTO) {
+                    NTS_LOGGER.hide();
+                    NTS_NOTIFICATION.notify("Press ENTER to change camera");
+                } else if (this.mode === this.MODE_FLY) {
+                    NTS_NOTIFICATION.notify("ARROWS drive, W/S move up/down.");
+                } else if (this.mode === this.MODE_MAN) {
+                    NTS_LOGGER.show();
+                    NTS_NOTIFICATION.notify("ARROWS move, W/S move up/down, Q/A look up/down");
+                }
+            }.bind(this)
+        );
 
         // scratchpad vectors
         this._a = NTS_VEC.Vec3.create();
@@ -100,14 +101,14 @@ class NTS_PLAYER_C {
         if (this.mode === this.MODE_AUTO) {
             this.updateAuto(this.curT / 1000.0, dt);
         } else if (this.mode === this.MODE_FLY) {
-            this.updateDrone(NTS_INPUT.state, dt);
+            this.updateDrone(NTS_INPUT.state, dt, this.world.droneHolder);
         } else if (this.mode === this.MODE_MAN) {
             this.updateManual(NTS_INPUT.state, dt);
         }
         // Calc cam look direction vector
         var d = this.state.dir;
         d.z = Math.sin(this.state.pitch);
-        var s = (1.0 - Math.abs(d.z));
+        var s = 1.0 - Math.abs(d.z);
         d.x = Math.cos(this.state.yaw) * s;
         d.y = Math.sin(this.state.yaw) * s;
     }
@@ -166,40 +167,45 @@ class NTS_PLAYER_C {
         this.state.yaw = Math.sin(time * 0.04) * Math.PI * 2.0 + Math.PI * 0.5;
 
         // Actual height at camera
-        var groundHeight = Math.max(NTS_HEIGHTFIELD.heightAt(this.HEIGHTFIELD, this.state.pos.x, this.state.pos.y, true), this.WATERHEIGHT);
+        var groundHeight = Math.max(
+            NTS_HEIGHTFIELD.heightAt(this.HEIGHTFIELD, this.state.pos.x, this.state.pos.y, true),
+            this.WATERHEIGHT
+        );
 
         // Look ahead heights
         var h1 = Math.max(NTS_HEIGHTFIELD.heightAt(this.HEIGHTFIELD, this._p1.x, this._p1.y, true), this.WATERHEIGHT);
         var h2 = Math.max(NTS_HEIGHTFIELD.heightAt(this.HEIGHTFIELD, this._p2.x, this._p2.y, true), this.WATERHEIGHT);
         var h3 = Math.max(NTS_HEIGHTFIELD.heightAt(this.HEIGHTFIELD, this._p3.x, this._p3.y, true), this.WATERHEIGHT);
-        
+
         //let minHeight = (groundHeight + h1 + h2 + h3) / 4.0
         var minHeight = Math.max(Math.max(Math.max(groundHeight, h1), h2), h3);
-        
-        var floatVel = (this.state.floatHeight < minHeight) ?
-              (minHeight - this.state.floatHeight) : (groundHeight - this.state.floatHeight);
-              
+
+        var floatVel =
+            this.state.floatHeight < minHeight
+                ? minHeight - this.state.floatHeight
+                : groundHeight - this.state.floatHeight;
+
         if (floatVel < 0) {
             floatVel *= 0.25; // can sink more slowly
         }
-        
+
         this.state.floatHeight += floatVel * this.FLOAT_VEL * ft;
-        
+
         // Make absolutely sure we're above ground
         if (this.state.floatHeight < groundHeight) {
             this.state.floatHeight = groundHeight;
         }
-            
+
         // SET PLAYER Z POSITION
         this.state.pos.z += this.state.floatHeight + this.MIN_HEIGHT;
-        
+
         // Calc velocities based on difs from prev frame
         this._d.x = this.state.pos.x - this._a.x;
         this._d.y = this.state.pos.y - this._a.y;
         this._d.z = this.state.pos.z - this._a.z;
         this.state.vel.x = this._d.x / ft;
         this.state.vel.y = this._d.y / ft;
-        
+
         this.state.vel.z = this._d.z / ft;
         var dyaw = this.state.yaw - yaw0;
         this.state.yawVel = dyaw / ft;
@@ -213,37 +219,37 @@ class NTS_PLAYER_C {
     }
 
     // Drone-like physics
-    updateDrone(i, dt) {
+    updateDrone(i, dt, drone) {
         // Delta time in seconds
         var ft = dt / 1000.0;
         // calc roll accel
         var ra = 0;
-        
+
         if (i.left > 0) {
             ra = -this.ROLL_ACCEL;
         } else if (i.right > 0) {
             ra = this.ROLL_ACCEL;
         }
-        
+
         // calc roll resist forces
         var rr = -this.state.roll * this.ROLL_RESIST;
         var rf = -NTS_GMATH.sign(this.state.rollVel) * this.ROLL_FRIC * Math.abs(this.state.rollVel);
-        
+
         // total roll accel
         ra = ra + rr + rf;
         this.state.rollVel += ra * ft;
         this.state.roll += this.state.rollVel * ft;
-        
+
         // Calc yaw accel
         var ya = -this.state.roll * this.YAW_ACCEL;
-        
+
         // yaw drag
         var yd = -NTS_GMATH.sign(this.state.yawVel) * Math.abs(Math.pow(this.state.yawVel, 3.0)) * this.YAW_DRAG;
-        
+
         // update yaw
         this.state.yawVel += (ya + yd) * ft;
         this.state.yaw += this.state.yawVel * ft;
-        
+
         // Calc pitch accel
         var pa = 0;
         if (i.forward > 0) {
@@ -254,76 +260,80 @@ class NTS_PLAYER_C {
         // Calc pitch resist forces
         var pr = -this.state.pitch * this.PITCH_RESIST;
         var pf = -NTS_GMATH.sign(this.state.pitchVel) * this.PITCH_FRIC * Math.abs(this.state.pitchVel);
-        
+
         // total pitch accel
         pa = pa + pr + pf;
         this.state.pitchVel += pa * ft;
         this.state.pitch += this.state.pitchVel * ft;
-        
+
         // Calc accel vector
         NTS_VEC.Vec3.set(this._a, 0, 0, 0);
         this._a.x = -this.state.pitch * this.ACCEL * Math.cos(this.state.yaw);
         this._a.y = -this.state.pitch * this.ACCEL * Math.sin(this.state.yaw);
-        
+
         // Calc drag vector (horizontal)
         var absVel = NTS_VEC.Vec2.length(this.state.vel); // state.vel.length()
         this._d.x = -this.state.vel.x;
         this._d.y = -this.state.vel.y;
         NTS_VEC.Vec2.setLength(this._d, absVel * this.DRAG, this._d);
-        
+
         // Calc vertical accel
         if (i.up > 0 && this.state.pos.z < this.MAX_HEIGHT - 2.0) {
             this._a.z = this.VACCEL;
         } else if (i.down > 0 && this.state.pos.z > this.MIN_HEIGHT) {
             this._a.z = -this.VACCEL;
         }
-        
+
         this._d.z = -this.state.vel.z * this.VDRAG;
-        
+
         // update vel
         this.state.vel.x += (this._a.x + this._d.x) * ft;
         this.state.vel.y += (this._a.y + this._d.y) * ft;
         this.state.vel.z += (this._a.z + this._d.z) * ft;
-        
+
         // update pos
         this.state.pos.x += this.state.vel.x * ft;
         this.state.pos.y += this.state.vel.y * ft;
         this.state.pos.z += this.state.vel.z * ft;
-        
-        var groundHeight = Math.max(NTS_HEIGHTFIELD.heightAt(this.HEIGHTFIELD, this.state.pos.x, this.state.pos.y, true), this.WATERHEIGHT);
-        
+
+        var groundHeight = Math.max(
+            NTS_HEIGHTFIELD.heightAt(this.HEIGHTFIELD, this.state.pos.x, this.state.pos.y, true),
+            this.WATERHEIGHT
+        );
+
         // SET PLAYER Z POSITION
         if (this.state.pos.z < groundHeight + this.MIN_HEIGHT) {
             this.state.pos.z = groundHeight + this.MIN_HEIGHT;
         } else if (this.state.pos.z > this.MAX_HEIGHT) {
             this.state.pos.z = this.MAX_HEIGHT;
         }
+
     }
 
     // Manual movement
     updateManual(i, dt) {
         var ft = dt / 1000.0;
         this.state.yawVel = 0;
-        
+
         if (i.left) {
             this.state.yawVel = this.MAN_YAWVEL;
         } else if (i.right) {
             this.state.yawVel = -this.MAN_YAWVEL;
         }
-        
+
         this.state.yaw += this.state.yawVel * ft;
         this.state.pitchVel = 0;
-        
+
         if (i.pitchup) {
             this.state.pitchVel = this.MAN_PITCHVEL;
         } else if (i.pitchdown) {
             this.state.pitchVel = -this.MAN_PITCHVEL;
         }
-        
+
         this.state.pitch += this.state.pitchVel * ft;
         this.state.pitch = NTS_GMATH.clamp(this.state.pitch, -this.MAN_MAXPITCH, this.MAN_MAXPITCH);
         NTS_VEC.Vec3.set(this.state.vel, 0, 0, 0);
-        
+
         if (i.forward) {
             this.state.vel.x = this.MAN_VEL * Math.cos(this.state.yaw);
             this.state.vel.y = this.MAN_VEL * Math.sin(this.state.yaw);
@@ -331,20 +341,23 @@ class NTS_PLAYER_C {
             this.state.vel.x = -this.MAN_VEL * Math.cos(this.state.yaw);
             this.state.vel.y = -this.MAN_VEL * Math.sin(this.state.yaw);
         }
-        
+
         this.state.pos.x += this.state.vel.x * ft;
         this.state.pos.y += this.state.vel.y * ft;
-        
+
         if (i.up) {
             this.state.vel.z = this.MAN_ZVEL;
         } else if (i.down) {
             this.state.vel.z = -this.MAN_ZVEL;
         }
-        
+
         this.state.pos.z += this.state.vel.z * ft;
-        
-        var groundHeight = Math.max(NTS_HEIGHTFIELD.heightAt(this.HEIGHTFIELD, this.state.pos.x, this.state.pos.y, true), this.WATERHEIGHT);
-        
+
+        var groundHeight = Math.max(
+            NTS_HEIGHTFIELD.heightAt(this.HEIGHTFIELD, this.state.pos.x, this.state.pos.y, true),
+            this.WATERHEIGHT
+        );
+
         if (this.state.pos.z < groundHeight + this.MIN_HEIGHT) {
             this.state.pos.z = groundHeight + this.MIN_HEIGHT;
         } else if (this.state.pos.z > this.MAX_HEIGHT) {
@@ -360,8 +373,4 @@ class NTS_PLAYER_C {
      nextMode: nextMode
      };
      */
-
 }
-
-
-              
