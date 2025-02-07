@@ -264,12 +264,15 @@ class NTS_WORLD_C {
                 droneScene.rotation.x = Math.PI / 2;
                 droneScene.scale.set(10, 10, 10);
 
+                // for updating postition with player (camera holder)
+                this.player.drone = droneScene;
+
                 let mixer = new THREE.AnimationMixer(gltf);
-                const animations = gltf.animations;
-                if (animations && animations.length > 0) {
-                    const animation = animations[0];
-                    mixer.clipAction(animation).play();
-                }
+                // const animations = gltf.animations;
+                // if (animations && animations.length > 0) {
+                //     const animation = animations[0];
+                //     mixer.clipAction(animation).play();
+                // }
 
                 const light = new THREE.AmbientLight(0xffffff); // soft white light
                 this.scene.add(light);

@@ -54,6 +54,8 @@ class NTS_PLAYER_C {
         this.MODE_MAN = 2;
         this.NUM_MODES = 3;
 
+        this.drone;
+
         //let autoplay = true
         this.mode = this.MODE_FLY;
         this.curT = 0;
@@ -188,7 +190,7 @@ class NTS_PLAYER_C {
             this.state.floatHeight = groundHeight;
         }
             
-        
+        // SET PLAYER Z POSITION
         this.state.pos.z += this.state.floatHeight + this.MIN_HEIGHT;
         
         // Calc velocities based on difs from prev frame
@@ -290,7 +292,7 @@ class NTS_PLAYER_C {
         
         var groundHeight = Math.max(NTS_HEIGHTFIELD.heightAt(this.HEIGHTFIELD, this.state.pos.x, this.state.pos.y, true), this.WATERHEIGHT);
         
-        // Player hieght set
+        // SET PLAYER Z POSITION
         if (this.state.pos.z < groundHeight + this.MIN_HEIGHT) {
             this.state.pos.z = groundHeight + this.MIN_HEIGHT;
         } else if (this.state.pos.z > this.MAX_HEIGHT) {
