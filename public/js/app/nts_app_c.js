@@ -181,7 +181,7 @@ class NTS_APP_C {
                     { name: "skydome", url: "data/skydome.jpg" },
                     { name: "skyenv", url: "data/skyenv.jpg" },
                 ],
-                models: [{ name: "drone", url: "models/mech_drone.glb" }],
+                models: [{ name: "drone", url: "models/mech_drone_4mb_dl.glb" }],
             },
             onAssetsLoaded,
             onAssetsProgress,

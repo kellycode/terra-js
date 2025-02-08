@@ -67,6 +67,9 @@ class NTS_WORLD_C {
 
         this.canvas = this.util_1.$e("app_canvas");
 
+        this.drone;
+        this.droneMixer;
+
         // Make canvas transparent so it isn't rendered as black for 1 frame at startup
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
@@ -292,14 +295,16 @@ class NTS_WORLD_C {
                 this.droneHolder.add(droneScene);
                 this.scene.add(this.droneHolder);
 
-                this.player.drone = droneScene;
+                this.drone = gltf;
 
-                let mixer = new THREE.AnimationMixer(gltf);
-                // const animations = gltf.animations;
-                // if (animations && animations.length > 0) {
-                //     const animation = animations[0];
-                //     mixer.clipAction(animation).play();
-                // }
+                this.drone.userData.clock = new THREE.Clock();
+
+                this.droneMixer = new THREE.AnimationMixer(gltf.scene);
+                const animations = gltf.animations;
+                if (animations && animations.length > 0) {
+                    const animation = animations[0];
+                    this.droneMixer.clipAction(animation).play();
+                }
 
                 const light = new THREE.AmbientLight(0xffffff); // soft white light
                 this.scene.add(light);
@@ -408,7 +413,7 @@ class NTS_WORLD_C {
 
         // UPDATE DRONE POSITION AND ONCE WE HAVE
         // THE DRONE, ADD THE CAMERA AND MAKE IT FOLLOW
-        if (this.player.drone) {
+        if (this.drone) {
             this.droneHolder.add(this.camHolder);
 
             this.camHolder.position.x = -10;
@@ -425,6 +430,12 @@ class NTS_WORLD_C {
             this.droneHolder.rotation.z = pyaw;
             this.droneHolder.rotation.y = -ppitch;
             this.droneHolder.rotation.x = proll;
+
+            let delta = this.drone.userData.clock.getDelta();
+
+            if (this.droneMixer) {
+                this.droneMixer.update(delta);
+            }
         } else {
             // Update camera location/orientation
             this.vec_1.Vec3.copy(ppos, this.camHolder.position);
