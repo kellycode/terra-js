@@ -63,7 +63,7 @@ class NTS_WORLD_C {
         this.GLARE_YAW = Math.PI * 1.5; // yaw angle when looking directly at sun
         this.GLARE_PITCH = 0.2; // pitch angle looking at sun
         this.GLARE_COLOR = this.vec_1.Color.create(1.0, 0.8, 0.4);
-        this.INTRO_FADE_DUR = 2000;
+        this.INTRO_FADE_DUR = 500;
 
         this.canvas = this.util_1.$e("app_canvas");
 
@@ -195,11 +195,11 @@ class NTS_WORLD_C {
         this.scene.add(this.meshes.water);
         this.meshes.water.position.z = this.WATER_LEVEL;
 
-        // White plane to cover screen for fullscreen fade-in from white
+        // Black plane to cover screen for fullscreen fade-in from white
         this.meshes.fade = new THREE.Mesh(
             new THREE.PlaneGeometry(6.0, 4.0, 1, 1),
             new THREE.MeshBasicMaterial({
-                color: 0xffffff,
+                color: 0x000000,
                 fog: false,
                 transparent: true,
                 opacity: 1.0,
@@ -241,7 +241,52 @@ class NTS_WORLD_C {
         this.simT = 0; // total running time (ms)
         this.resize(displayWidth, displayHeight);
 
-        // toggle logger on ` press
+        this.cameraPosition = {
+            x: -10,
+            y: 0,
+            z: 5.5,
+            r: Math.PI/10
+        };
+
+        this.input.setWheelListener(
+            'wlOne',
+            function(e, delta) {
+                if(delta > 0) {
+                    if(e.ctrlKey) {
+                        this.cameraPosition.x += 1;
+                    } else if(e.shiftKey) {
+                       // this.cameraPosition.z += 1;
+                    } else {
+                        this.cameraPosition.r += 0.1;
+                    }
+                } else {
+                    if(e.ctrlKey) {
+                        this.cameraPosition.x -= 1;
+                    } else if(e.shiftKey) {
+                        //this.cameraPosition.z -= 1;
+                    } else {
+                        this.cameraPosition.r -= 0.1;
+                    }
+                }
+            }.bind(this)
+        );
+
+        this.input.setKeyPressListener(
+            107,
+            function () {
+                this.cameraPosition.x += 1;
+            }.bind(this)
+        );
+
+        this.input.setKeyPressListener(
+            109,
+            function () {
+                this.cameraPosition.x -= 1;
+            }.bind(this)
+        );
+
+
+        // toggle logger on ` (tilde) press
         this.input.setKeyPressListener(
             192,
             function () {
@@ -281,8 +326,8 @@ class NTS_WORLD_C {
         this._v = this.vec_1.Vec2.create(0.0, 0.0);
 
         // Install Drone
-        setTimeout(
-            function () {
+       // setTimeout(
+            //function () {
                 let gltf = assets.models["drone"];
                 let droneScene = gltf.scene;
                 
@@ -308,9 +353,9 @@ class NTS_WORLD_C {
 
                 const light = new THREE.AmbientLight(0xffffff); // soft white light
                 this.scene.add(light);
-            }.bind(this),
-            2000
-        );
+           // }.bind(this),
+           // 2000
+        //);
     }
 
     // Call every frame
@@ -416,10 +461,10 @@ class NTS_WORLD_C {
         if (this.drone) {
             this.droneHolder.add(this.camHolder);
 
-            this.camHolder.position.x = -10;
-            this.camHolder.position.y = 0;
-            this.camHolder.position.z = 5.5;
-             this.camHolder.rotation.y = Math.PI/10;
+            this.camHolder.position.x = this.cameraPosition.x;
+            this.camHolder.position.y = this.cameraPosition.y;
+            this.camHolder.position.z = this.cameraPosition.z;
+            this.camHolder.rotation.y = this.cameraPosition.r;
 
             //this.updateChaseCamera(this.droneHolder, this.camera);
 

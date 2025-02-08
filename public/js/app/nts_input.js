@@ -1,4 +1,3 @@
-
 // USES:
 // -
 
@@ -14,7 +13,6 @@
 "use strict";
 
 let NTS_INPUT = {
-
     state: {
         up: 0,
         down: 0,
@@ -23,33 +21,43 @@ let NTS_INPUT = {
         forward: 0,
         back: 0,
         pitchup: 0,
-        pitchdown: 0
+        pitchdown: 0,
     },
 
     keyStates: [],
     keyPressListeners: {},
+    wheelListeners: {},
 
     initialized: false,
 
     setState: function (k, s) {
         var cs = this.state;
+        console.log(k);
         // arrow keys L/R/F/B
-        if (k === 37 || k === 65) // left arrow or a
+        if (k === 37 || k === 65)
+            // left arrow or a
             cs.left = s;
-        else if (k === 39 || k === 68) // right arrow or d
+        else if (k === 39 || k === 68)
+            // right arrow or d
             cs.right = s;
-        else if (k === 38 || k === 87) // up arrow or w
+        else if (k === 38 || k === 87)
+            // up arrow or w
             cs.forward = s;
-        else if (k === 40 || k === 83) // down arrow or s
+        else if (k === 40 || k === 83)
+            // down arrow or s
             cs.back = s;
-        else if (k === 32) // space bar (far cry 4 buzzer)
+        else if (k === 32)
+            // space bar (far cry 4 buzzer)
             cs.up = s;
-        else if (k === 16) // left shift (far cry 4 buzzer)
+        else if (k === 16)
+            // left shift (far cry 4 buzzer)
             cs.down = s;
         // pitchup/down only used in MODE_MAN
-        else if (k === 81) // Q
+        else if (k === 81)
+            // Q
             cs.pitchup = s;
-        else if (k === 69) // E
+        else if (k === 69)
+            // E
             cs.pitchdown = s;
     },
 
@@ -58,7 +66,7 @@ let NTS_INPUT = {
             this.setState(ev.keyCode, 1.0);
             this.keyStates[ev.keyCode] = true;
             var codeStr = ev.keyCode.toString();
-            if (typeof this.keyPressListeners[codeStr] === 'function') {
+            if (typeof this.keyPressListeners[codeStr] === "function") {
                 //console.log(codeStr);
                 this.keyPressListeners[codeStr]();
             }
@@ -72,12 +80,27 @@ let NTS_INPUT = {
         }
     },
 
+    onWheel: function (e) {
+        let delta = Math.max(-1, Math.min(1, e.wheelDelta || -e.detail));
+        for (const [key, value] of Object.entries(this.wheelListeners)) {
+            this.wheelListeners[key](e, delta);
+          }
+    },
+
     init: function () {
         if (this.initialized) {
             return;
         }
-        document.addEventListener('keydown', this.onKeyDown.bind(this), true);
-        document.addEventListener('keyup', this.onKeyUp.bind(this), true);
+        document.addEventListener("keydown", this.onKeyDown.bind(this), true);
+        document.addEventListener("keyup", this.onKeyUp.bind(this), true);
+        document.addEventListener("wheel", this.onWheel.bind(this), true);
+        document.addEventListener('wheel', function(event) { 
+            if (event.ctrlKey) { 
+              event.preventDefault(); 
+            } 
+            this.onWheel;
+          }.bind(this), { passive: false });
+          
         this.initialized = true;
     },
 
@@ -85,10 +108,11 @@ let NTS_INPUT = {
         return this.keyStates[code];
     },
 
+    setWheelListener: function(name, fn) {
+        this.wheelListeners[name] = fn;
+    },
+
     setKeyPressListener: function (code, fn) {
         this.keyPressListeners[code.toString()] = fn;
-    }
+    },
 };
-
-
-        

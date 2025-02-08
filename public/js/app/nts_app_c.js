@@ -60,7 +60,7 @@ class NTS_APP_C {
         this.resize();
         this.loadAssets();
         this.configUI();
-        window.addEventListener("resize", this.resize, false);
+        window.addEventListener("resize", this.resize.bind(this), false);
 
         return true;
     }
@@ -137,25 +137,27 @@ class NTS_APP_C {
                 this.util_1.$e("loading_bar_outer").style.visibility = "hidden";
                 this.util_1.$e("config_block").style.visibility = "visible";
 
-                //this.util_1.$e('btn_start').onclick = () => {
-                this.anim.fadeOut(this.util_1.$e("loading_block"), 80, () => {
-                    this.util_1.$e("loading_block").style.display = "none";
-                    this.util_1.$e("app_ui_container").style.backgroundColor = "transparent";
+                // HIDE THE LOADING SCREEN COMMENT
+                //this.util_1.$e("btn_start").onclick = () => {
+                    this.anim.fadeOut(this.util_1.$e("loading_block"), 80, () => {
+                        this.util_1.$e("loading_block").style.display = "none";
+                        this.util_1.$e("app_ui_container").style.backgroundColor = "transparent";
 
-                    if (!this.isFullscreen) {
-                        this.util_1.$e("title_bar").style.display = "block";
-                    }
+                        if (!this.isFullscreen) {
+                            this.util_1.$e("title_bar").style.display = "block";
+                        }
 
-                    this.util_1.$e("btn_fullscreen").onclick = () => {
-                        this.fullscreen.toggle(util_1.$e("app_container"));
-                    };
+                        this.util_1.$e("btn_fullscreen").onclick = () => {
+                            this.fullscreen.toggle(util_1.$e("app_container"));
+                        };
 
-                    this.util_1.$e("btn_restart").onclick = () => {
-                        document.location.reload();
-                    };
+                        this.util_1.$e("btn_restart").onclick = () => {
+                            document.location.reload();
+                        };
 
-                    this.start();
-                });
+                        this.start();
+                    });
+                // HIDE THE LOADING SCREEN COMMENT
                 //};
             }, 10);
         }.bind(this);
@@ -227,15 +229,27 @@ class NTS_APP_C {
         requestAnimationFrame(this.doFrame.bind(this));
     }
 
+    /*
+    window.addEventListener(
+        "resize",
+        function () {
+            CHASE_CAMERA.aspect = window.innerWidth / window.innerHeight;
+            CHASE_CAMERA.updateProjectionMatrix();
+            RENDERER.setSize(window.innerWidth, window.innerHeight);
+        },
+        false
+    );
+    */
+
     // Handle window resize events
     resize() {
-        this.displayWidth = this.container.clientWidth;
-        this.displayHeight = this.container.clientHeight;
+        this.displayWidth = window.innerWidth;
+        this.displayHeight = window.innerHeight;
 
         if (this.world) {
             this.world.resize(this.displayWidth, this.displayHeight);
         } else {
-            let canvas = this.util_1.$e("app_canvas");
+            let canvas = document.getElementById("app_canvas");
             canvas.width = this.displayWidth;
             canvas.height = this.displayHeight;
         }
@@ -245,7 +259,7 @@ class NTS_APP_C {
 
         if (fs !== this.isFullscreen) {
             // Show/hide the UI when switching windowed/FS mode.
-            this.util_1.$e("title_bar").style.display = fs ? "none" : "block";
+            document.getElementById("title_bar").style.display = fs ? "none" : "block";
             this.isFullscreen = fs;
         }
     }

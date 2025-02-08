@@ -54,8 +54,6 @@ class NTS_PLAYER_C {
         this.drone;
         this.world = world;
 
-        //let autoplay = true
-        this.mode = this.MODE_FLY;
         this.curT = 0;
         this.state = {
             pos: NTS_VEC.Vec3.create(0.0, 0.0, this.DEFAULT_HEIGHT),
@@ -70,6 +68,16 @@ class NTS_PLAYER_C {
             floatHeight: 0.0,
         };
 
+        title_bar_left
+
+        this.setModeText = function(mode) {
+            document.getElementById("title_bar_left").textContent = mode;
+        }
+
+        //let autoplay = true
+        this.mode = this.MODE_FLY;
+        this.setModeText('Fly Mode');
+
         NTS_INPUT.setKeyPressListener(
             13,
             function () {
@@ -77,11 +85,14 @@ class NTS_PLAYER_C {
                 if (this.mode === this.MODE_AUTO) {
                     NTS_LOGGER.hide();
                     NTS_NOTIFICATION.notify("Press ENTER to change camera");
+                    this.setModeText('Auto Mode');
                 } else if (this.mode === this.MODE_FLY) {
                     NTS_NOTIFICATION.notify("ARROWS drive, W/S move up/down.");
+                    this.setModeText('Fly Mode');
                 } else if (this.mode === this.MODE_MAN) {
                     NTS_LOGGER.show();
                     NTS_NOTIFICATION.notify("ARROWS move, W/S move up/down, Q/A look up/down");
+                    this.setModeText('Manual Mode');
                 }
             }.bind(this)
         );
