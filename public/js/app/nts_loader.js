@@ -8,7 +8,7 @@
 
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
-// Untypescript 2023 by Kearnan Kelly
+
 
 "use strict";
 
@@ -102,9 +102,7 @@ let NTS_LOADER = {
             ad.url,
             function (gltf) {
                 assets.models[ad.name] = gltf;
-                console.log("Drone loaded")
                 doProgressCallback;
-                //scene.add(gltf.scene);
             },
             undefined,
             function (error) {

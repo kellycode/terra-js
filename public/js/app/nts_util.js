@@ -10,15 +10,11 @@
 
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
-// Untypescript 2023 by Kearnan Kelly
+
 "use strict";
 
 let NTS_UTIL = {
-    $e: function(id) {
-        return document.getElementById(id);
-    },
-
-    $i: function(id) {
+    docGetElById: function(id) {
         return document.getElementById(id);
     },
 

@@ -8,7 +8,7 @@
 
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
-// Untypescript 2023 by Kearnan Kelly
+
 
 "use strict";
 
@@ -17,14 +17,14 @@ let NTS_NOTIFICATION = {
     notifying: false,
 
     notify: function (msg) {
-        let elTxt = NTS_UTIL.$e('notification_text');
+        let elTxt = NTS_UTIL.docGetElById('notification_text');
         elTxt.textContent = msg;
         
         if (NTS_NOTIFICATION.notifying) {
             return;
         }
             
-        let el = NTS_UTIL.$e('notification');
+        let el = NTS_UTIL.docGetElById('notification');
         el.style.display = 'block';
         el.style.opacity = '1.0';
         

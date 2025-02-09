@@ -21,14 +21,14 @@
 
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
-// Untypescript 2023 by Kearnan Kelly
+
 
 "use strict";
 
 class NTS_WORLD_C {
     // Create a World instance
     constructor(assets, numGrassBlades, grassPatchRadius, displayWidth, displayHeight, antialias) {
-        this.util_1 = NTS_UTIL;
+        this.nts_Util = NTS_UTIL;
         this.gmath_1 = NTS_GMATH;
         this.vec_1 = NTS_VEC;
         this.logger = NTS_LOGGER;
@@ -65,7 +65,7 @@ class NTS_WORLD_C {
         this.GLARE_COLOR = this.vec_1.Color.create(1.0, 0.8, 0.4);
         this.INTRO_FADE_DUR = 500;
 
-        this.canvas = this.util_1.$e("app_canvas");
+        this.canvas = this.nts_Util.docGetElById("app_canvas");
 
         this.drone;
         this.droneMixer;

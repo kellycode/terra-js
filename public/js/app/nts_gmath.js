@@ -13,7 +13,7 @@
 
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
-// Untypescript 2023 by Kearnan Kelly
+
 
 
 "use strict";

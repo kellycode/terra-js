@@ -7,14 +7,14 @@
 
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
-// Untypescript 2023 by Kearnan Kelly
+
 
 "use strict";
 
 let NTS_FULLSCREEN = {
 
     toggle: function (el) {
-        if (!is()) {
+        if (!this.is()) {
             /*if (document.mozFullscreenEnabled === false) {
              console.warn("Fullscreen may not be available")
              }*/

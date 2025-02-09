@@ -12,13 +12,13 @@
 
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
-// Untypescript 2023 by Kearnan Kelly
+
 
 "use strict";
 
 class NTS_APP_C {
     constructor() {
-        this.util_1 = NTS_UTIL;
+        this.nts_Util = NTS_UTIL;
         this.loader_1 = NTS_LOADER;
         this.input = NTS_INPUT;
         this.anim = NTS_ANIM;
@@ -35,7 +35,7 @@ class NTS_APP_C {
         };
 
         // DOM element containing canvas
-        this.container = this.util_1.$e("app_canvas_container");
+        this.container = this.nts_Util.docGetElById("app_canvas_container");
 
         // Will be set correctly later
         this.displayWidth = 640;
@@ -47,13 +47,13 @@ class NTS_APP_C {
 
     // Call this when HTML page elements are loaded & ready
     run() {
-        if (!this.util_1.$e("app_canvas_container")) {
+        if (!this.nts_Util.docGetElById("app_canvas_container")) {
             console.error("app_canvas_container element not found in page");
             return false;
         }
 
-        if (!this.util_1.detectWebGL()) {
-            this.util_1.$e("loading_text").textContent = "WebGL unavailable.";
+        if (!this.nts_Util.detectWebGL()) {
+            this.nts_Util.docGetElById("loading_text").textContent = "WebGL unavailable.";
             return false;
         }
 
@@ -68,24 +68,25 @@ class NTS_APP_C {
     // Configuration UI input handlers
     configUI() {
         // Select a config roughly based on device type
-        let cfgDevice = NTS_BROWSER.isMobile.any ? "mobile" : "desktop";
+        // Or, it just picks a default if it's not mobile
+        let cfgDevice = NTS_BROWSER.isMobile.any ? "mobile" : "gamerig";
         let cfg = this.CONFIGS[cfgDevice];
 
-        let sel = this.util_1.$i("sel_devicepower");
+        let sel = this.nts_Util.docGetElById("sel_devicepower");
         sel.value = cfgDevice;
 
-        let inp_blades = this.util_1.$i("inp_blades");
+        let inp_blades = this.nts_Util.docGetElById("inp_blades");
         inp_blades.value = cfg.blades.toString();
 
-        let inp_depth = this.util_1.$i("inp_depth");
+        let inp_depth = this.nts_Util.docGetElById("inp_depth");
         inp_depth.value = cfg.depth.toString();
 
-        this.util_1.$i("chk_antialias").checked = cfg.antialias;
-        this.util_1.$i("chk_fullscreen").checked = false;
+        this.nts_Util.docGetElById("chk_antialias").checked = cfg.antialias;
+        this.nts_Util.docGetElById("chk_fullscreen").checked = false;
 
-        this.util_1.$i("chk_fullscreen").onchange = function () {
-            this.fullscreen.toggle(this.util_1.$e("app_container"));
-        };
+        this.nts_Util.docGetElById("chk_fullscreen").onchange = function () {
+            this.fullscreen.toggle(this.nts_Util.docGetElById("app_container"));
+        }.bind(this);
 
         sel.onchange = (e) => {
             let cfg = this.CONFIGS[sel.value];
@@ -93,21 +94,21 @@ class NTS_APP_C {
             let d = cfg.depth.toString();
             inp_blades.value = b;
             inp_depth.value = d;
-            this.util_1.$e("txt_blades").textContent = b;
-            this.util_1.$e("txt_depth").textContent = d;
-            this.util_1.$i("chk_antialias").checked = cfg.antialias;
+            this.nts_Util.docGetElById("txt_blades").textContent = b;
+            this.nts_Util.docGetElById("txt_depth").textContent = d;
+            this.nts_Util.docGetElById("chk_antialias").checked = cfg.antialias;
         };
 
-        this.util_1.$e("txt_blades").textContent = cfg.blades.toString();
-        this.util_1.$e("txt_depth").textContent = cfg.depth.toString();
+        this.nts_Util.docGetElById("txt_blades").textContent = cfg.blades.toString();
+        this.nts_Util.docGetElById("txt_depth").textContent = cfg.depth.toString();
 
         inp_blades.onchange = function (e) {
-            this.util_1.$e("txt_blades").textContent = inp_blades.value;
-        };
+            this.nts_Util.docGetElById("txt_blades").textContent = inp_blades.value;
+        }.bind(this);
 
         inp_depth.onchange = function (e) {
-            this.util_1.$e("txt_depth").textContent = inp_depth.value;
-        };
+            this.nts_Util.docGetElById("txt_depth").textContent = inp_depth.value;
+        }.bind(this);
     }
 
     // TODO this should be in its own file
@@ -119,46 +120,46 @@ class NTS_APP_C {
         let onAssetsProgress = function (p) {
             //console.log('onAssetsProgress');
             let pct = Math.floor(p * 90);
-            this.util_1.$e("loading_bar").style.width = pct + "%";
+            this.nts_Util.docGetElById("loading_bar").style.width = pct + "%";
         }.bind(this);
 
         let onAssetsError = function (e) {
             console.error("onAssetsError");
-            this.util_1.$e("loading_text").textContent = e;
+            this.nts_Util.docGetElById("loading_text").textContent = e;
         }.bind(this);
 
         let onAssetsLoaded = function (a) {
             //console.log('onAssetsLoaded');
             this.assets = a;
-            this.util_1.$e("loading_bar").style.width = "100%";
-            this.util_1.$e("loading_text").innerHTML = "&nbsp;";
+            this.nts_Util.docGetElById("loading_bar").style.width = "100%";
+            this.nts_Util.docGetElById("loading_text").innerHTML = "&nbsp;";
 
             setTimeout(() => {
-                this.util_1.$e("loading_bar_outer").style.visibility = "hidden";
-                this.util_1.$e("config_block").style.visibility = "visible";
+                this.nts_Util.docGetElById("loading_bar_outer").style.visibility = "hidden";
+                this.nts_Util.docGetElById("config_block").style.visibility = "visible";
 
                 // HIDE THE LOADING SCREEN COMMENT
-                //this.util_1.$e("btn_start").onclick = () => {
-                    this.anim.fadeOut(this.util_1.$e("loading_block"), 80, () => {
-                        this.util_1.$e("loading_block").style.display = "none";
-                        this.util_1.$e("app_ui_container").style.backgroundColor = "transparent";
+                this.nts_Util.docGetElById("btn_start").onclick = () => {
+                    this.anim.fadeOut(this.nts_Util.docGetElById("loading_block"), 80, () => {
+                        this.nts_Util.docGetElById("loading_block").style.display = "none";
+                        this.nts_Util.docGetElById("app_ui_container").style.backgroundColor = "transparent";
 
                         if (!this.isFullscreen) {
-                            this.util_1.$e("title_bar").style.display = "block";
+                            this.nts_Util.docGetElById("title_bar").style.display = "block";
                         }
 
-                        this.util_1.$e("btn_fullscreen").onclick = () => {
-                            this.fullscreen.toggle(util_1.$e("app_container"));
+                        this.nts_Util.docGetElById("btn_fullscreen").onclick = () => {
+                            this.fullscreen.toggle(nts_Util.docGetElById("app_container"));
                         };
 
-                        this.util_1.$e("btn_restart").onclick = () => {
+                        this.nts_Util.docGetElById("btn_restart").onclick = () => {
                             document.location.reload();
                         };
 
                         this.start();
                     });
                 // HIDE THE LOADING SCREEN COMMENT
-                //};
+                };
             }, 10);
         }.bind(this);
 
@@ -195,8 +196,8 @@ class NTS_APP_C {
     // All stuff loaded, setup event handlers & start the app...
     start() {
         // music
-        if (this.util_1.$i("chk_audio").checked) {
-            let au = this.util_1.$e("chopin");
+        if (this.nts_Util.docGetElById("chk_audio").checked) {
+            let au = this.nts_Util.docGetElById("chopin");
             au.loop = true;
             au.play();
         }
@@ -205,9 +206,9 @@ class NTS_APP_C {
         this.input.init();
 
         // Get detail settings from UI inputs
-        let numGrassBlades = +this.util_1.$i("inp_blades").value;
-        let grassPatchRadius = +this.util_1.$i("inp_depth").value;
-        let antialias = !!this.util_1.$i("chk_antialias").checked;
+        let numGrassBlades = +this.nts_Util.docGetElById("inp_blades").value;
+        let grassPatchRadius = +this.nts_Util.docGetElById("inp_depth").value;
+        let antialias = !!this.nts_Util.docGetElById("chk_antialias").checked;
 
         // Create an instance of the world
         this.world = new this.WORLD(
