@@ -251,6 +251,12 @@ class NTS_PLAYER_C {
         this.state.rollVel += ra * ft;
         this.state.roll += this.state.rollVel * ft;
 
+        if (i.pitchup) {
+            this.state.pitchVel = this.MAN_PITCHVEL;
+        } else if (i.pitchdown) {
+            this.state.pitchVel = -this.MAN_PITCHVEL;
+        }
+
         // Calc yaw accel
         var ya = -this.state.roll * this.YAW_ACCEL;
 

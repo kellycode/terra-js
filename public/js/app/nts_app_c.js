@@ -13,7 +13,6 @@
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
 
-
 "use strict";
 
 class NTS_APP_C {
@@ -43,6 +42,9 @@ class NTS_APP_C {
         this.assets;
         this.world;
         this.isFullscreen = this.fullscreen.is();
+
+        // turn on/off the load options screen
+        this.showOptionScreen = false;
     }
 
     // Call this when HTML page elements are loaded & ready
@@ -128,6 +130,27 @@ class NTS_APP_C {
             this.nts_Util.docGetElById("loading_text").textContent = e;
         }.bind(this);
 
+        let continueLoad = function () {
+            this.anim.fadeOut(this.nts_Util.docGetElById("loading_block"), 80, () => {
+                this.nts_Util.docGetElById("loading_block").style.display = "none";
+                this.nts_Util.docGetElById("app_ui_container").style.backgroundColor = "transparent";
+
+                if (!this.isFullscreen) {
+                    this.nts_Util.docGetElById("title_bar").style.display = "block";
+                }
+
+                this.nts_Util.docGetElById("btn_fullscreen").onclick = () => {
+                    this.fullscreen.toggle(nts_Util.docGetElById("app_container"));
+                };
+
+                this.nts_Util.docGetElById("btn_restart").onclick = () => {
+                    document.location.reload();
+                };
+
+                this.start();
+            });
+        }.bind(this);
+
         let onAssetsLoaded = function (a) {
             //console.log('onAssetsLoaded');
             this.assets = a;
@@ -138,28 +161,14 @@ class NTS_APP_C {
                 this.nts_Util.docGetElById("loading_bar_outer").style.visibility = "hidden";
                 this.nts_Util.docGetElById("config_block").style.visibility = "visible";
 
-                // HIDE THE LOADING SCREEN COMMENT
-                this.nts_Util.docGetElById("btn_start").onclick = () => {
-                    this.anim.fadeOut(this.nts_Util.docGetElById("loading_block"), 80, () => {
-                        this.nts_Util.docGetElById("loading_block").style.display = "none";
-                        this.nts_Util.docGetElById("app_ui_container").style.backgroundColor = "transparent";
-
-                        if (!this.isFullscreen) {
-                            this.nts_Util.docGetElById("title_bar").style.display = "block";
-                        }
-
-                        this.nts_Util.docGetElById("btn_fullscreen").onclick = () => {
-                            this.fullscreen.toggle(nts_Util.docGetElById("app_container"));
-                        };
-
-                        this.nts_Util.docGetElById("btn_restart").onclick = () => {
-                            document.location.reload();
-                        };
-
-                        this.start();
-                    });
-                // HIDE THE LOADING SCREEN COMMENT
-                };
+                if(this.showOptionScreen) {
+                    this.nts_Util.docGetElById("btn_start").onclick = () => {
+                        continueLoad();
+                    };
+                } else {
+                    continueLoad();
+                }
+                
             }, 10);
         }.bind(this);
 
