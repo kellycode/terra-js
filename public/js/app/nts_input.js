@@ -49,10 +49,10 @@ let NTS_INPUT = {
         else if (k === 32)
             // space bar (far cry 4 buzzer)
             cs.up = s;
-        else if (k === 16)
-            // left shift (far cry 4 buzzer)
+        else if (k === 67)
+            // c key (far cry 4 buzzer)
             cs.down = s;
-        // pitchup/down only used in MODE_MAN
+        // pitchup/down used in manual and fly modes
         else if (k === 81)
             // Q
             cs.pitchup = s;
