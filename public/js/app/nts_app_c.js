@@ -37,8 +37,8 @@ class NTS_APP_C {
         this.container = this.nts_Util.docGetElById("app_canvas_container");
 
         // Will be set correctly later
-        this.displayWidth = 640;
-        this.displayHeight = 480;
+        this.displayWidth = window.innerWidth;
+        this.displayHeight = window.innerHeight;
         this.assets;
         this.world;
         this.isFullscreen = this.fullscreen.is();
@@ -59,7 +59,7 @@ class NTS_APP_C {
             return false;
         }
 
-        this.resize();
+        // /this.resize();
         this.loadAssets();
         this.configUI();
         window.addEventListener("resize", this.resize.bind(this), false);
@@ -239,25 +239,13 @@ class NTS_APP_C {
         requestAnimationFrame(this.doFrame.bind(this));
     }
 
-    /*
-    window.addEventListener(
-        "resize",
-        function () {
-            CHASE_CAMERA.aspect = window.innerWidth / window.innerHeight;
-            CHASE_CAMERA.updateProjectionMatrix();
-            RENDERER.setSize(window.innerWidth, window.innerHeight);
-        },
-        false
-    );
-    */
-
     // Handle window resize events
     resize() {
         this.displayWidth = window.innerWidth;
         this.displayHeight = window.innerHeight;
 
         if (this.world) {
-            this.world.resize(this.displayWidth, this.displayHeight);
+            this.world.setRenderCamSize(this.displayWidth, this.displayHeight);
         } else {
             let canvas = document.getElementById("app_canvas");
             canvas.width = this.displayWidth;

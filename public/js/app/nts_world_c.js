@@ -239,7 +239,7 @@ class NTS_WORLD_C {
         // For timing
         this.prevT = Date.now(); // prev frame time (ms)
         this.simT = 0; // total running time (ms)
-        this.resize(displayWidth, displayHeight);
+        this.setRenderCamSize(displayWidth, displayHeight);
 
         this.cameraPosition = {
             x: -10,
@@ -383,7 +383,7 @@ class NTS_WORLD_C {
     }
 
     // Handle window resize events
-    resize(w, h) {
+    setRenderCamSize(w, h) {
         this.displayWidth = w;
         this.displayHeight = h;
         this.renderer.setSize(this.displayWidth, this.displayHeight);
@@ -568,9 +568,4 @@ class NTS_WORLD_C {
         this.renderer.render(this.scene, this.camera);
     }
 
-    // Return public interface
-    //    return {
-    //        doFrame: doFrame,
-    //        resize: resize
-    //    };
 }
