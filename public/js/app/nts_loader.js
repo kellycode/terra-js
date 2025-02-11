@@ -66,7 +66,6 @@ let NTS_LOADER = {
     },
 
     loadText: function (ad) {
-        
         let req = new XMLHttpRequest();
         req.overrideMimeType('*/*');
         req.onreadystatechange = () => {
@@ -85,45 +84,47 @@ let NTS_LOADER = {
 
     loadImage: function (ad) {
         // maintaining a 'pointer' to 'this'
-        let doProgressCallback = this.doProgress(this);
-
+        let doProgressCallback = this.doProgress.bind(this);
+        let doErrorCallback = this.doError.bind(this);
         let img = new Image();
         this.assets.images[ad.name] = img;
         img.onload = doProgressCallback;
-        img.onerror = this.doError;
+        img.onerror = doErrorCallback;
         img.src = ad.url;
     },
 
     loadGLTF: function (ad) {
         let assets = this.assets;
-        let doProgressCallback = this.doProgress(this);
+        let doProgressCallback = this.doProgress.bind(this);
+        let doErrorCallback = this.doError.bind(this);
         const loader = new THREE.GLTFLoader();
         loader.load(
             ad.url,
             function (gltf) {
                 assets.models[ad.name] = gltf;
-                doProgressCallback;
+                doProgressCallback();
             },
             undefined,
             function (error) {
-                console.error(error);
+                doErrorCallback("Error " + error.respone.statusText + " loading " + ad.url);
             }
         );
     },
 
     loadTexture: function (ad) {
-        let doProgressCallback = this.doProgress(this);
+        let doProgressCallback = this.doProgress.bind(this);
         this.assets.textures[ad.name] = new THREE.TextureLoader().load(ad.url, doProgressCallback);
     },
 
     doProgress: function () {
         this.numLoaded += 1;
+        console.log("Loaded " + this.numLoaded + " of " + this.totalToLoad + " assets.")
         this.progress_callback && this.progress_callback(this.numLoaded / this.totalToLoad);
         this.tryDone();
     },
 
     doError: function (e) {
-        this.error_callback && this.error_callback(e);
+        this.error_callback(e);
         this.numFailed += 1;
         this.tryDone();
     },
@@ -133,7 +134,8 @@ let NTS_LOADER = {
             return true;
         }
         if (this.numLoaded + this.numFailed >= this.totalToLoad) {
-            let ok = !this.numFailed;
+            let ok = this.numFailed === 0;
+            console.log(this.numFailed)
             if (ok && this.success_callback) {
                 this.success_callback(this.assets);
             }

@@ -32,7 +32,7 @@ let NTS_INPUT = {
 
     setState: function (k, s) {
         var cs = this.state;
-        console.log(k);
+        //console.log(k);
         // arrow keys L/R/F/B
         if (k === 37 || k === 65)
             // left arrow or a

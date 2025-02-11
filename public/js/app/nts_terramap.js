@@ -67,7 +67,7 @@ let NTS_TERRAMAP = {
         }
         let dt = Date.now() - tStart;
         
-        console.log("computed terrain data texture (".concat(w, "x").concat(h, ") values in ").concat(dt, "ms"));
+        //console.log("computed terrain data texture (".concat(w, "x").concat(h, ") values in ").concat(dt, "ms"));
         
         return buf;
     },

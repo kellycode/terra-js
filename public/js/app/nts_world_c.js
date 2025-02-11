@@ -22,7 +22,6 @@
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
 
-
 "use strict";
 
 class NTS_WORLD_C {
@@ -40,6 +39,7 @@ class NTS_WORLD_C {
         this.terramap = NTS_TERRAMAP;
         this.water = NTS_WATER;
         this.fps_1 = NTS_FPS;
+        this.nts_Drone = NTS_DRONE;
         this.GRASS_PITCH_RADIUS = grassPatchRadius;
         this.NUM_GRASS_BLADES = numGrassBlades;
         this.VIEW_DEPTH = 2000.0;
@@ -112,9 +112,6 @@ class NTS_WORLD_C {
         this.camHolder.rotation.order = "ZYX";
         this.camHolder.add(this.camera);
         this.scene.add(this.camHolder);
-
-        this.droneHolder = new THREE.Object3D();
-        this.droneHolder.rotation.order = "ZYX";
 
         // Setup heightfield
         this.hfImg = assets.images["heightmap"];
@@ -245,24 +242,24 @@ class NTS_WORLD_C {
             x: -10,
             y: 0,
             z: 5.5,
-            r: Math.PI/10
+            r: Math.PI / 10,
         };
 
         this.input.setWheelListener(
-            'wlOne',
-            function(e, delta) {
-                if(delta > 0) {
-                    if(e.ctrlKey) {
+            "wlOne",
+            function (e, delta) {
+                if (delta > 0) {
+                    if (e.ctrlKey) {
                         this.cameraPosition.x += 1;
-                    } else if(e.shiftKey) {
-                       // this.cameraPosition.z += 1;
+                    } else if (e.shiftKey) {
+                        // this.cameraPosition.z += 1;
                     } else {
                         this.cameraPosition.r += 0.1;
                     }
                 } else {
-                    if(e.ctrlKey) {
+                    if (e.ctrlKey) {
                         this.cameraPosition.x -= 1;
-                    } else if(e.shiftKey) {
+                    } else if (e.shiftKey) {
                         //this.cameraPosition.z -= 1;
                     } else {
                         this.cameraPosition.r -= 0.1;
@@ -284,7 +281,6 @@ class NTS_WORLD_C {
                 this.cameraPosition.x -= 1;
             }.bind(this)
         );
-
 
         // toggle logger on ` (tilde) press
         this.input.setKeyPressListener(
@@ -326,36 +322,17 @@ class NTS_WORLD_C {
         this._v = this.vec_1.Vec2.create(0.0, 0.0);
 
         // Install Drone
-       // setTimeout(
-            //function () {
-                let gltf = assets.models["drone"];
-                let droneScene = gltf.scene;
-                
-                droneScene.rotation.x = Math.PI / 2;
-                droneScene.rotation.y = -Math.PI / 2;
-                droneScene.scale.set(10, 10, 10);
-
-                this.droneHolder.position.set(10, 0, 110);
-
-                this.droneHolder.add(droneScene);
-                this.scene.add(this.droneHolder);
-
-                this.drone = gltf;
-
-                this.drone.userData.clock = new THREE.Clock();
-
-                this.droneMixer = new THREE.AnimationMixer(gltf.scene);
-                const animations = gltf.animations;
-                if (animations && animations.length > 0) {
-                    const animation = animations[0];
-                    this.droneMixer.clipAction(animation).play();
+        if (assets.models["drone"]) {
+            this.nts_Drone.initDrone(this, assets);
+        } else {
+            setTimeout(function () {
+                if (assets.models["drone"]) {
+                    this.nts_Drone.initDrone(this, assets);
+                } else {
+                    console.log("Drone not loaded");
                 }
-
-                const light = new THREE.AmbientLight(0xffffff); // soft white light
-                this.scene.add(light);
-           // }.bind(this),
-           // 2000
-        //);
+            }, 2000);
+        }
     }
 
     // Call every frame
@@ -456,31 +433,12 @@ class NTS_WORLD_C {
         this.terrain_1.update(this.terra, ppos.x, ppos.y);
         this.water.update(this.meshes.water, ppos);
 
-        // UPDATE DRONE POSITION AND ONCE WE HAVE
-        // THE DRONE, ADD THE CAMERA AND MAKE IT FOLLOW
+        // The Drone took over as the player
+        // update the drone, otherwise continue
+        // without - reason: there was a problem loading the drone
+        // but that's fixed
         if (this.drone) {
-            this.droneHolder.add(this.camHolder);
-
-            this.camHolder.position.x = this.cameraPosition.x;
-            this.camHolder.position.y = this.cameraPosition.y;
-            this.camHolder.position.z = this.cameraPosition.z;
-            this.camHolder.rotation.y = this.cameraPosition.r;
-
-            //this.updateChaseCamera(this.droneHolder, this.camera);
-
-            this.droneHolder.position.x = ppos.x;
-            this.droneHolder.position.y = ppos.y;
-            this.droneHolder.position.z = ppos.z;
-            //this.droneHolder.position.z = this.camHolder.position.z;
-            this.droneHolder.rotation.z = pyaw;
-            this.droneHolder.rotation.y = -ppitch;
-            this.droneHolder.rotation.x = proll;
-
-            let delta = this.drone.userData.clock.getDelta();
-
-            if (this.droneMixer) {
-                this.droneMixer.update(delta);
-            }
+            this.nts_Drone.updateDrone(this, ppos, pyaw, ppitch, proll)
         } else {
             // Update camera location/orientation
             this.vec_1.Vec3.copy(ppos, this.camHolder.position);
@@ -496,11 +454,10 @@ class NTS_WORLD_C {
     }
 
     updateChaseCamera(PLAYER, CHASE_CAMERA) {
-
         this.CAMERA_LR_D = 50;
         this.CAMERA_UD_D = 1;
         this.CHASE_CAM_DISTANCE = -350;
-        
+
         // if the player is moving, gradually reset all of the camera offsets
         // if (isWalking || isLefting || isRighting) {
         //     if(CHASE_CAMERA.userData.leftRightOffset > 0) {
@@ -508,7 +465,7 @@ class NTS_WORLD_C {
         //     } else if(CHASE_CAMERA.userData.leftRightOffset < 0) {
         //         CHASE_CAMERA.userData.leftRightOffset += this.CONSTANTS.CAMERA_LR_D;
         //     }
-            
+
         //     if(CHASE_CAMERA.userData.upDownOffset > 0) {
         //         CHASE_CAMERA.userData.upDownOffset -= this.CONSTANTS.CAMERA_UD_D;
         //     } else if(CHASE_CAMERA.userData.upDownOffset < 0) {
@@ -530,10 +487,10 @@ class NTS_WORLD_C {
 
         // above player position
         CHASE_CAMERA.position.y = PLAYER.position.y + PLAYER.position.z;
-        CHASE_CAMERA.position.z = PLAYER.position.z;// - distance * rotZ;
+        CHASE_CAMERA.position.z = PLAYER.position.z; // - distance * rotZ;
 
         CHASE_CAMERA.lookAt(PLAYER.position.x, PLAYER.position.y, PLAYER.position.z);
-        
+
         //CHASE_CAMERA.rotateX(ud_offset/100)
     }
 
@@ -567,5 +524,4 @@ class NTS_WORLD_C {
     render() {
         this.renderer.render(this.scene, this.camera);
     }
-
 }

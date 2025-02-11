@@ -129,7 +129,8 @@ let NTS_HEIGHTFIELD = {
             }
         }
         var dt = Date.now() - tStart;
-        console.log("computed ".concat(i, " heightfield face normals in ").concat(dt, "ms"));
+
+        //console.log("computed ".concat(i, " heightfield face normals in ").concat(dt, "ms"));
     },
 
     calcVertexNormals: function (hf) {
@@ -149,7 +150,7 @@ let NTS_HEIGHTFIELD = {
             }
         }
         var dt = Date.now() - tStart;
-        console.log("computed ".concat(w * h, " vertex normals in ").concat(dt, "ms"));
+        //console.log("computed ".concat(w * h, " vertex normals in ").concat(dt, "ms"));
     },
 
     computeVertexNormal: function (hf, vx, vy, n) {
