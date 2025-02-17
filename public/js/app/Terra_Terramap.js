@@ -1,20 +1,10 @@
-/*global THREE*/
-
-// USES:
-// THREE
-// NTS_GMATH
-// NTS_VEC
-
-// USED IN:
-// NTS_WORLD_C
-
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
-import { Terra_Vec } from "./Terra_Vec.js"
-import { Terra_Math } from "./Terra_Math.js"
 
 "use strict";
 
+import { Terra_Vec } from "./Terra_Vec.js"
+import { Terra_Math } from "./Terra_Math.js"
 
 export class Terra_Terramap {
 

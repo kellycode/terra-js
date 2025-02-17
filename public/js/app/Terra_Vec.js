@@ -1,20 +1,6 @@
 
-// USES:
-// -
-
-// USED IN:
-// NTS_GRASS
-// NTS_HEIGHTFIELD
-// NTS_PLAYER_C
-// NTS_TERRAIN
-// NTS_TERRAMAP
-// NTS_VEC
-// NTS_WATER
-// NTS_WORLD_C
-
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
-
 
 "use strict";
 
@@ -22,8 +8,6 @@
 // i.e. Any object with matching property names will work,
 
 // 3D VECTOR FUNCTIONS
-
-
 
 export class Terra_Vec {
 

@@ -1,20 +1,5 @@
-
-// USES:
-// -
-
-// USED IN:
-// NTS_ANIM
-// NTS_GMATH
-// NTS_GRASS
-// NTS_HEIGHTFIELD
-// NTS_PLAYER
-// NTS_TERRAMAP
-// NTS_WORLD
-
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
-
-
 
 "use strict";
 

@@ -1,14 +1,12 @@
-// USED IN:
-// NTS_WORLD_C
-
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
+
+"use strict";
+
 import { Terra_Math } from "./Terra_Math.js"
 import { Terra_Vec } from "./Terra_Vec.js"
 import { Terra_Input } from "./Terra_Input.js"
 import { Terra_Heightfield } from "./Terra_Heightfield.js"
-
-"use strict";
 
 // Creates a Player instance
 // (User first person camera)

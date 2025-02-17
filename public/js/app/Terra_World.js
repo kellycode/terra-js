@@ -1,14 +1,8 @@
-Terra_Math/*global THREE*/
-
-// USES:
-// THREE
-// NTS_PLAYER_C
-
-// USED IN:
-// NTS_APP_C
-
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
+
+"use strict";
+
 import { Terra_Math } from "./Terra_Math.js"
 import { Terra_Vec } from "./Terra_Vec.js"
 import { Terra_Logger } from "./Terra_Logger.js"
@@ -20,8 +14,6 @@ import { Terra_Terramap } from "./Terra_Terramap.js"
 import { Terra_Water } from "./Terra_Water.js"
 import { Terra_FPS } from "./Terra_FPS.js"
 import { Terra_Player } from "./Terra_Player.js"
-
-"use strict";
 
 export class Terra_World {
     // Create a World instance

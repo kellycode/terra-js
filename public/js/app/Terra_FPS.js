@@ -1,13 +1,5 @@
-
-// USES:
-// -
-
-// USED IN:
-// NTS_WORLD
-
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
-
 
 "use strict";
 

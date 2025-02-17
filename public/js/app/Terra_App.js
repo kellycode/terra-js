@@ -1,3 +1,8 @@
+// LICENSE: MIT
+// Copyright (c) 2016 by Mike Linkovich
+
+"use strict";
+
 import { Terra_World } from "./Terra_World.js"
 import { Terra_Input } from "./Terra_Input.js"
 import { Terra_Loader } from "./Terra_Loader.js"

@@ -1,18 +1,10 @@
-
-// USES:
-// Terra_Math
-// Terra_Vec
-
-// USED IN:
-// NTS_PLAYER_C
-// NTS_WORLD_C
-
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
-import { Terra_Math } from "./Terra_Math.js"
-import { Terra_Vec } from "./Terra_Vec.js"
 
 "use strict";
+
+import { Terra_Math } from "./Terra_Math.js"
+import { Terra_Vec } from "./Terra_Vec.js"
 
 export class Terra_Heightfield {
 

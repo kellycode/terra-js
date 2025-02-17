@@ -1,11 +1,3 @@
-// USES:
-// -
-
-// USED IN:
-// NTS_APP_C
-// NTS_PLAYER_C
-// NTS_WORLD_C
-
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
 

@@ -1,7 +1,6 @@
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
 
-
 "use strict";
 
 // simply used when the fullscreen button is

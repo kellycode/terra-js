@@ -1,21 +1,7 @@
-/*global THREE*/
-
-// USES:
-// THREE
-// NTS_VEC
-
-// USED IN:
-// NTS_WORLD_C
-
 // LICENSE: MIT
 // Copyright (c) 2016 by Mike Linkovich
-
 
 "use strict";
-
-
-// LICENSE: MIT
-// Copyright (c) 2016 by Mike Linkovich
 
 // Terrain uses a custom shader so that we can apply the same
 // type of fog as is applied to the grass. This way they both
