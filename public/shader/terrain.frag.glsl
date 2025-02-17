@@ -43,7 +43,9 @@ void main() {
 	float depth = gl_FragCoord.z / gl_FragCoord.w;
 
 	// If terrain is covered by grass geometry, blend color to 'dirt'
-	float dirtFactor = 1.0 - smoothstep(grassFogFar * 0.2, grassFogFar * 0.65, depth);
+	// Remove dirt 
+	// float dirtFactor = 1.0 - smoothstep(grassFogFar * 0.2, grassFogFar * 0.65, depth);
+	float dirtFactor = 1.0 - smoothstep(grassFogFar * 0.0, grassFogFar * 0.0, depth);
 	// If we're not on a grass terrain type, don't shade it...
 	dirtFactor *= grassAmount;
 	float dirtShade = (color.r + color.g + color.b) / 3.0;
