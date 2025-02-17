@@ -3,8 +3,10 @@
 
 "use strict";
 
-export class Terra_Loader {
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
+export class Terra_Loader {
     static isLoading = false;
     static totalToLoad = 0;
     static numLoaded = 0;
@@ -13,11 +15,11 @@ export class Terra_Loader {
     static progress_callback = null;
     static error_callback = null;
     static done_cb = null;
-    
+
     static assets = { images: {}, text: {}, textures: {}, models: {} };
-    
+
     // Start loading a list of assets
-    static load (assetList, onAssetsLoaded, onAssetsProgress, onAssetsError, onAssetsDone) {
+    static load(assetList, onAssetsLoaded, onAssetsProgress, onAssetsError, onAssetsDone) {
         this.success_callback = onAssetsLoaded;
         this.progress_callback = onAssetsProgress;
         this.error_callback = onAssetsError;
@@ -54,11 +56,11 @@ export class Terra_Loader {
                 this.loadGLTF(assetList.models[i]);
             }
         }
-    };
+    }
 
-    static loadText (ad) {
+    static loadText(ad) {
         let req = new XMLHttpRequest();
-        req.overrideMimeType('*/*');
+        req.overrideMimeType("*/*");
         req.onreadystatechange = () => {
             if (req.readyState === 4) {
                 if (req.status === 200) {
@@ -69,11 +71,11 @@ export class Terra_Loader {
                 }
             }
         };
-        req.open('GET', ad.url);
+        req.open("GET", ad.url);
         req.send();
-    };
+    }
 
-    static loadImage (ad) {
+    static loadImage(ad) {
         // maintaining a 'pointer' to 'this'
         let doProgressCallback = this.doProgress.bind(this);
         let doErrorCallback = this.doError.bind(this);
@@ -82,13 +84,13 @@ export class Terra_Loader {
         img.onload = doProgressCallback;
         img.onerror = doErrorCallback;
         img.src = ad.url;
-    };
+    }
 
-    static loadGLTF (ad) {
+    static loadGLTF(ad) {
         let assets = this.assets;
         let doProgressCallback = this.doProgress.bind(this);
         let doErrorCallback = this.doError.bind(this);
-        const loader = new THREE.GLTFLoader();
+        const loader = new GLTFLoader();
         loader.load(
             ad.url,
             function (gltf) {
@@ -97,36 +99,43 @@ export class Terra_Loader {
             },
             undefined,
             function (error) {
-                doErrorCallback("Error " + error.respone.statusText + " loading " + ad.url);
+                if (error && error.response && error.respone.statusText) {
+                    doErrorCallback("Error " + error.respone.statusText + " loading " + ad.url);
+                } else if (error.message) {
+                    doErrorCallback("Error " + error.message + " loading " + ad.url);
+                    if (error.stack) {
+                        doErrorCallback("Error " + error.stack + " loading " + ad.url);
+                    }
+                }
             }
         );
-    };
+    }
 
-    static loadTexture (ad) {
+    static loadTexture(ad) {
         let doProgressCallback = this.doProgress.bind(this);
         this.assets.textures[ad.name] = new THREE.TextureLoader().load(ad.url, doProgressCallback);
-    };
+    }
 
-    static doProgress () {
+    static doProgress() {
         this.numLoaded += 1;
-        console.log("Loaded " + this.numLoaded + " of " + this.totalToLoad + " assets.")
+        //console.log("Loaded " + this.numLoaded + " of " + this.totalToLoad + " assets.")
         this.progress_callback && this.progress_callback(this.numLoaded / this.totalToLoad);
         this.tryDone();
-    };
+    }
 
-    static doError (e) {
+    static doError(e) {
         this.error_callback(e);
         this.numFailed += 1;
         this.tryDone();
-    };
+    }
 
-    static tryDone () {
+    static tryDone() {
         if (!this.isLoading) {
             return true;
         }
         if (this.numLoaded + this.numFailed >= this.totalToLoad) {
             let ok = this.numFailed === 0;
-            console.log(this.numFailed)
+            console.log("Failed loading: " + this.numFailed);
             if (ok && this.success_callback) {
                 this.success_callback(this.assets);
             }
@@ -134,10 +143,9 @@ export class Terra_Loader {
             this.isLoading = false;
         }
         return !this.isLoading;
-    };
+    }
 
-    static getAssets () {
+    static getAssets() {
         return this.assets;
-    };
-
-};
+    }
+}

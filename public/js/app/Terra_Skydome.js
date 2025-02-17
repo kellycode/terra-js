@@ -3,6 +3,8 @@
 
 "use strict";
 
+import * as THREE from "three";
+
 export class Terra_Skydome {
     static createMesh(tex, radius, lats, lngs) {
         if (lats === void 0) {

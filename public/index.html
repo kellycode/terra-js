@@ -9,16 +9,16 @@
 
         <link type="text/css" rel="stylesheet" href="css/style.css" media="screen" />
 
-        <!-- <script type="importmap">
+        <script type="importmap">
             {
-              "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
-              }
+                "imports": {
+                    "three": "https://cdn.jsdelivr.net/npm/three@0.173.0/build/three.module.js",
+                    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.173.0/examples/jsm/"
+                }
             }
-          </script> -->
+        </script>
 
-          <script type="module">
+        <script type="module">
             //import * as THREE from "three";
             //import { WaterMaker } from "./js/app/WaterMaker.js"
             //let wm = new WaterMaker();
@@ -35,42 +35,55 @@
                     <div id="title_bar" style="display: none">
                         <div id="title_bar_left" class="noselect"><a href="/">spacejack.github.io</a></div>
                         <div id="title_bar_right" class="noselect">
-                            <span id="btn_restart" class=btn_icon width="20" height="20" alt="restart">&#x21bb;</span>                            
-                            <img id="btn_fullscreen" class="btn_icon" src="img/fullscreen.svg" width="20" height="20" alt="fullscreen" />
+                            <span id="btn_restart" class="btn_icon" width="20" height="20" alt="restart">&#x21bb;</span>
+                            <img
+                                id="btn_fullscreen"
+                                class="btn_icon"
+                                src="img/fullscreen.svg"
+                                width="20"
+                                height="20"
+                                alt="fullscreen"
+                            />
                         </div>
                     </div>
 
                     <div id="loading_block">
-                        <div id="loading_title" class="noselect">terra</div>
-                        <p>&copy; 2017-2020 by Mike Linkovich | <a href="https://spacejack.github.io/">spacejack.github.io</a> | <a href="https://github.com/spacejack/terra">source</a></p>
-                        <p style="font-size: 0.9em; font-style: italic; margin: 0">
-                            Made with <strong><a href="https://threejs.org/" target="_blank">three.js</a></strong>
-                        </p>
+                        <div id="loading_title" class="noselect">
+                            <div id="title">terra</div>
+                            <div id="attributes">
+                                <p>
+                                    &copy; 2017-2020 by Mike Linkovich |
+                                    <a href="https://spacejack.github.io/">spacejack.github.io</a> |
+                                    <a href="https://github.com/spacejack/terra">source</a>
+                                </p>
+                                <p style="font-size: 0.9em; font-style: italic; margin: 0">
+                                    Made with
+                                    <strong><a href="https://threejs.org/" target="_blank">three.js</a></strong>
+                                </p>
+                            </div>
+                        </div>
+
                         <div id="loading_bar_outer">
                             <div id="loading_bar"></div>
                         </div>
                         <div id="loading_text">loading</div>
-                        
                     </div>
 
                     <div id="notification" style="display: none"><div id="notification_text"></div></div>
 
                     <div id="logger" style="display: none">logger</div>
 
-                    <audio id="chopin" src="audio/chopin-nocturne-in-d-flat-major-op-27-no-2.mp3" style="display: none" />
+                    <audio
+                        id="chopin"
+                        src="audio/chopin-nocturne-in-d-flat-major-op-27-no-2.mp3"
+                        style="display: none"
+                    />
                 </div>
             </div>
         </div>
 
-        <script src="js/vendor/three/r147/three.min.js"></script>
-        <script src="js/vendor/three/r147/GLTFLoader.js"></script>
-        <script>
-            // nts_app_c.js
-            //new NTS_APP_C().run();
-        </script>
-
         <script type="module">
-            import { Terra_App } from "./js/app/Terra_App.js"
+            import { Terra_App } from "./js/app/Terra_App.js";
             new Terra_App().run();
         </script>
     </body>

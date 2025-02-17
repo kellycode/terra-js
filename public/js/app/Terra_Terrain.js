@@ -8,12 +8,13 @@
 // blend to green first, then blend to atmosphere color in the
 // distance.
 // Uses terrain shaders (see: shader/terrain.*.glsl)
+import * as THREE from "three";
 import { Terra_Vec } from "./Terra_Vec.js"
 
 export class Terra_Terrain {
 
     static MAX_INDICES = 262144; // 65536
-    static TEX_SCALE = 1.0 / 6.0; // texture scale per quad
+    static TEX_SCALE = 1.0 / 2.0; // texture scale per quad was 1/6
 
     static Terrain (opts) {
         // max square x,y divisions that will fit in max indices
@@ -30,6 +31,7 @@ export class Terra_Terrain {
         };
     };
     
+    // no idea why this update is needed
     static update (t, x, y) {
         var ix = Math.floor(x / t.cellSize);
         var iy = Math.floor(y / t.cellSize);

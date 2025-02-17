@@ -3,17 +3,18 @@
 
 "use strict";
 
-import { Terra_Math } from "./Terra_Math.js"
-import { Terra_Vec } from "./Terra_Vec.js"
-import { Terra_Logger } from "./Terra_Logger.js"
-import { Terra_Input } from "./Terra_Input.js"
-import { Terra_Skydome } from "./Terra_Skydome.js"
-import { Terra_Heightfield } from "./Terra_Heightfield.js"
-import { Terra_Terrain } from "./Terra_Terrain.js"
-import { Terra_Terramap } from "./Terra_Terramap.js"
-import { Terra_Water } from "./Terra_Water.js"
-import { Terra_FPS } from "./Terra_FPS.js"
-import { Terra_Player } from "./Terra_Player.js"
+import * as THREE from "three";
+import { Terra_Math } from "./Terra_Math.js";
+import { Terra_Vec } from "./Terra_Vec.js";
+import { Terra_Logger } from "./Terra_Logger.js";
+import { Terra_Input } from "./Terra_Input.js";
+import { Terra_Skydome } from "./Terra_Skydome.js";
+import { Terra_Heightfield } from "./Terra_Heightfield.js";
+import { Terra_Terrain } from "./Terra_Terrain.js";
+import { Terra_Terramap } from "./Terra_Terramap.js";
+import { Terra_Water } from "./Terra_Water.js";
+import { Terra_FPS } from "./Terra_FPS.js";
+import { Terra_Player } from "./Terra_Player.js";
 
 export class Terra_World {
     // Create a World instance
@@ -42,9 +43,6 @@ export class Terra_World {
         this.INTRO_FADE_DUR = 500;
 
         this.canvas = document.getElementById("app_canvas");
-
-        this.drone;
-        this.droneMixer;
 
         // Make canvas transparent so it isn't rendered as black for 1 frame at startup
         this.renderer = new THREE.WebGLRenderer({
@@ -134,19 +132,6 @@ export class Terra_World {
         this.meshes.sky.renderOrder = 30;
         this.scene.add(this.meshes.sky);
         this.meshes.sky.position.z = -25.0;
-        this.meshes.water = Terra_Water.createMesh({
-            envMap: assets.textures["skyenv"],
-            vertScript: assets.text["water.vert"],
-            fragScript: assets.text["water.frag"],
-            waterLevel: this.WATER_LEVEL,
-            waterColor: this.WATER_COLOR,
-            fogColor: this.FOG_COLOR,
-            fogNear: 1.0,
-            fogFar: this.fogDist,
-        });
-        this.meshes.water.renderOrder = 40;
-        this.scene.add(this.meshes.water);
-        this.meshes.water.position.z = this.WATER_LEVEL;
 
         // Black plane to cover screen for fullscreen fade-in from white
         this.meshes.fade = new THREE.Mesh(
@@ -200,6 +185,9 @@ export class Terra_World {
             z: 5.5,
             r: Math.PI / 10,
         };
+
+        let wm = new Terra_Water();
+        wm.createWater(this.scene, this.WATER_LEVEL);
 
         Terra_Input.setWheelListener(
             "wlOne",
@@ -361,31 +349,22 @@ export class Terra_World {
         this.meshes.sky.position.x = ppos.x;
         this.meshes.sky.position.y = ppos.y;
         //Terra_Terrain.update(this.terra, ppos.x, ppos.y);
-        Terra_Water.update(this.meshes.water, ppos);
 
-        // The Drone took over as the player
-        // update the drone, otherwise continue
-        // without - reason: there was a problem loading the drone
-        // but that's fixed
-        if (this.drone) {
-            this.nts_Drone.updateDrone(this, ppos, pyaw, ppitch, proll)
-        } else {
-            // Update camera location/orientation
-            Terra_Vec.Vec3.copy(ppos, this.camHolder.position);
-            //camHolder.position.z = ppos.z + groundHeight
-            this.camHolder.rotation.z = pyaw;
-            // Player considers 'up' pitch positive, but cam pitch (about Y) is reversed
-            this.camHolder.rotation.y = -ppitch;
-            this.camHolder.rotation.x = proll;
-        }
+        // Update camera location/orientation
+        Terra_Vec.Vec3.copy(ppos, this.camHolder.position);
+        //camHolder.position.z = ppos.z + groundHeight
+        this.camHolder.rotation.z = pyaw;
+        // Player considers 'up' pitch positive, but cam pitch (about Y) is reversed
+        this.camHolder.rotation.y = -ppitch;
+        this.camHolder.rotation.x = proll;
 
         // Update sun glare effect
+        // not really used
         this.updateGlare();
     }
 
     // Update how much glare effect by how much we're looking at the sun
     updateGlare() {
-
         let dy = Math.abs(Terra_Math.difAngle(this.GLARE_YAW, this.player.state.yaw));
         let dp = Math.abs(Terra_Math.difAngle(this.GLARE_PITCH, this.player.state.pitch)) * 1.75;
         let sunVisAngle = Math.sqrt(dy * dy + dp * dp);

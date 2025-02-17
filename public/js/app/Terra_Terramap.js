@@ -3,6 +3,7 @@
 
 "use strict";
 
+import * as THREE from "three";
 import { Terra_Vec } from "./Terra_Vec.js"
 import { Terra_Math } from "./Terra_Math.js"
 
@@ -12,6 +13,7 @@ export class Terra_Terramap {
     // etc. data encoded into RGBA channels.
     static createTexture(hf, lightDir, imgWind) {
         let canvas = document.createElement('canvas');
+        //document.body.appendChild(canvas);
         let canvasWidth = hf.xCount + 1;
         let canvasHeight = hf.yCount + 1;
         canvas.width = canvasWidth;
