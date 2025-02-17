@@ -242,7 +242,8 @@ let NTS_HEIGHTFIELD = {
     },
     
     getPlaneZ: function(n, z0, x, y) {
-        return z0 - (n.x * x + n.y * y) / n.z;
+        const groundHeight = z0 - (n.x * x + n.y * y) / n.z;
+        return groundHeight;
     }
 
 };

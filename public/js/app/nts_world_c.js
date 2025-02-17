@@ -40,6 +40,7 @@ class NTS_WORLD_C {
         this.water = NTS_WATER;
         this.fps_1 = NTS_FPS;
         this.nts_Drone = NTS_DRONE;
+        this.nts_Trees = NTS_TREES;
         this.GRASS_PITCH_RADIUS = grassPatchRadius;
         this.NUM_GRASS_BLADES = numGrassBlades;
         this.VIEW_DEPTH = 2000.0;
@@ -99,17 +100,35 @@ class NTS_WORLD_C {
         this.scene = new THREE.Scene();
         this.scene.fog = new THREE.Fog(this.vec_1.Color.to24bit(this.FOG_COLOR), 0.1, this.fogDist);
 
+        /*
+        var map = new THREE.TextureLoader().load('data/terrain1.jpg  ');
+        let floorGeometry = new THREE.PlaneGeometry(500, 500, 128, 128);
+        const floorMaterial = new THREE.MeshStandardMaterial({
+            color: "#777777",
+            metalness: 0.2,
+            roughness: 0.6,
+            envMapIntensity: 0.5,
+            side: THREE.DoubleSide,
+            map: map,
+        });
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.receiveShadow = true;
+        floor.rotation.x = 0;//Math.PI * 0.5;
+        floor.position.set(400, -550, 70);
+        this.scene.add(floor);
+        */
+
         // Setup the camera so Z is up.
         // Then we have cartesian X,Y coordinates along ground plane.
-        this.camera.rotation.order = "ZXY";
-        this.camera.rotation.x = Math.PI * 0.5;
-        this.camera.rotation.y = Math.PI * 0.5;
+        //this.camera.rotation.order = "ZXY";
+        this.camera.rotation.x = -Math.PI * 0.5;
+        this.camera.rotation.y = -Math.PI * 0.5;
         this.camera.rotation.z = Math.PI;
-        this.camera.up.set(0.0, 0.0, 1.0);
+        // /this.camera.up.set(0.0, 1.0, 0.0);
 
         // Put camera in an object so we can transform it normally
         this.camHolder = new THREE.Object3D();
-        this.camHolder.rotation.order = "ZYX";
+        //this.camHolder.rotation.order = "ZYX";
         this.camHolder.add(this.camera);
         this.scene.add(this.camHolder);
 
@@ -152,7 +171,7 @@ class NTS_WORLD_C {
             windIntensity: this.windIntensity,
         });
         // Set a specific render order - don't let three.js sort things for us.
-        this.meshes.grass.renderOrder = 10;
+        this.meshes.grass.renderOrder = 0;
         this.scene.add(this.meshes.grass);
 
         // Terrain mesh
@@ -235,7 +254,7 @@ class NTS_WORLD_C {
 
         // For timing
         this.prevT = Date.now(); // prev frame time (ms)
-        this.simT = 0; // total running time (ms)
+        this.runTime = 0; // total running time (ms)
         this.setRenderCamSize(displayWidth, displayHeight);
 
         this.cameraPosition = {
@@ -318,8 +337,9 @@ class NTS_WORLD_C {
 
         this.fpsMon = this.fps_1.FPSMonitor();
 
+        // also not used
         this._hinfo = this.heightfield_2.HInfo();
-        this._v = this.vec_1.Vec2.create(0.0, 0.0);
+        this.vector2_a = this.vec_1.Vec2.create(0.0, 0.0);
 
         // Install Drone
         if (assets.models["drone"]) {
@@ -333,25 +353,27 @@ class NTS_WORLD_C {
                 }
             }, 2000);
         }
+
+        this.nts_Trees.initTrees(this, assets, this.heightfield_2, this.WATER_LEVEL);
     }
 
     // Call every frame
 
     doFrame() {
         let curT = Date.now();
-        let dt = curT - this.prevT;
+        let delta = curT - this.prevT;
 
-        this.fpsMon.update(dt);
+        this.fpsMon.update(delta);
 
-        if (dt > 0) {
+        if (delta > 0) {
             // only do computations if time elapsed
-            if (dt > this.MAX_TIMESTEP) {
+            if (delta > this.MAX_TIMESTEP) {
                 // don't exceed max timestep
-                dt = this.MAX_TIMESTEP;
+                delta = this.MAX_TIMESTEP;
                 this.prevT = curT - this.MAX_TIMESTEP;
             }
             // update sim
-            this.update(dt);
+            this.update(delta);
             // render it
             this.render();
             // remember prev frame time
@@ -369,18 +391,19 @@ class NTS_WORLD_C {
     }
 
     // Logic update
-    update(dt) {
+    update(delta) {
         // Intro fade from white
-        if (this.simT < this.INTRO_FADE_DUR) {
-            this.updateFade(dt);
+        if (this.runTime < this.INTRO_FADE_DUR) {
+            this.updateFade(delta);
         }
 
-        this.simT += dt;
+        this.runTime += delta;
 
-        let t = this.simT * 0.001;
+        let time = this.runTime * 0.001;
 
         // Move player (viewer)
-        this.player.update(dt);
+        // player update calls updates for auto, manual or drone by mode
+        this.player.update(delta);
 
         let ppos = this.player.state.pos;
         let pdir = this.player.state.dir;
@@ -388,8 +411,10 @@ class NTS_WORLD_C {
         let ppitch = this.player.state.pitch;
         let proll = this.player.state.roll;
 
+        // commenting this out changes nothing and it's not clear what it does
         this.heightfield_2.infoAt(this.heightField, ppos.x, ppos.y, true, this._hinfo);
 
+        // always 0
         let groundHeight = this._hinfo.z;
 
         if (this.logger.isVisible()) {
@@ -423,22 +448,24 @@ class NTS_WORLD_C {
         // Here we specify the centre position of the square patch to
         // be drawn. That would be directly in front of the camera, the
         // distance from centre to edge of the patch.
-        let drawPos = this._v;
+        let drawPos = this.vector2_a;
         this.vec_1.Vec2.set(
             drawPos,
             ppos.x + Math.cos(pyaw) * this.GRASS_PITCH_RADIUS,
             ppos.y + Math.sin(pyaw) * this.GRASS_PITCH_RADIUS
         );
-        this.grass.update(this.meshes.grass, t, ppos, pdir, drawPos);
+
+        this.grass.update(this.meshes.grass, time, ppos, pdir, drawPos);
         this.terrain_1.update(this.terra, ppos.x, ppos.y);
         this.water.update(this.meshes.water, ppos);
+        this.nts_Trees.updateTrees(0, 0);
 
         // The Drone took over as the player
-        // update the drone, otherwise continue
+        // update the drone, otherwise continues
         // without - reason: there was a problem loading the drone
         // but that's fixed
         if (this.drone) {
-            this.nts_Drone.updateDrone(this, ppos, pyaw, ppitch, proll)
+            this.nts_Drone.updateDrone(this, ppos, pyaw, ppitch, proll);
         } else {
             // Update camera location/orientation
             this.vec_1.Vec3.copy(ppos, this.camHolder.position);
@@ -509,15 +536,15 @@ class NTS_WORLD_C {
     }
 
     // Update intro fullscreen fade from white
-    updateFade(dt) {
+    updateFade(delta) {
         let mat = this.meshes.fade.material;
-        if (this.simT + dt >= this.INTRO_FADE_DUR) {
+        if (this.runTime + delta >= this.INTRO_FADE_DUR) {
             // fade is complete - hide cover
             mat.opacity = 0.0;
             this.meshes.fade.visible = false;
         } else {
             // update fade opacity
-            mat.opacity = 1.0 - Math.pow(this.simT / this.INTRO_FADE_DUR, 2.0);
+            mat.opacity = 1.0 - Math.pow(this.runTime / this.INTRO_FADE_DUR, 2.0);
         }
     }
 

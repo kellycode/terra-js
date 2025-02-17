@@ -12,6 +12,8 @@
 "use strict";
 
 let NTS_DRONE = {
+    timer: 0,
+
     initDrone: function (world, assets) {
         let gltf = assets.models["drone"];
         let droneScene = gltf.scene;
@@ -56,9 +58,16 @@ let NTS_DRONE = {
         world.droneHolder.position.y = ppos.y;
         world.droneHolder.position.z = ppos.z;
 
+        // this.timer++;
+
+        // if(this.timer > 100) {
+        //     console.log(ppos);
+        //     this.timer = 0;
+        // }
+
         world.droneHolder.rotation.z = pyaw;
-        world.droneHolder.rotation.y = -ppitch;
-        world.droneHolder.rotation.x = proll;
+        world.droneHolder.rotation.y = 0;//-ppitch;
+        world.droneHolder.rotation.x = 0;//proll;
 
         let delta = world.drone.userData.clock.getDelta();
 

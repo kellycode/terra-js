@@ -118,7 +118,7 @@ let NTS_LOADER = {
 
     doProgress: function () {
         this.numLoaded += 1;
-        console.log("Loaded " + this.numLoaded + " of " + this.totalToLoad + " assets.")
+        //console.log("Loaded " + this.numLoaded + " of " + this.totalToLoad + " assets.")
         this.progress_callback && this.progress_callback(this.numLoaded / this.totalToLoad);
         this.tryDone();
     },
@@ -135,7 +135,6 @@ let NTS_LOADER = {
         }
         if (this.numLoaded + this.numFailed >= this.totalToLoad) {
             let ok = this.numFailed === 0;
-            console.log(this.numFailed)
             if (ok && this.success_callback) {
                 this.success_callback(this.assets);
             }

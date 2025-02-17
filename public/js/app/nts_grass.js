@@ -172,6 +172,7 @@ let NTS_GRASS = {
      // @param x X coordinate of centre position to draw at
      // @param y Y coord
     update: function (mesh, time, camPos, camDir, drawPos) {
+        //mesh.position.z -= 0.01;
         let mat = mesh.material;
         mat.uniforms['time'].value = time;
         let p = mat.uniforms['camDir'].value;

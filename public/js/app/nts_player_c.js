@@ -105,23 +105,27 @@ class NTS_PLAYER_C {
         this._p3 = NTS_VEC.Vec3.create();
     }
 
-    // @param dt Delta time in ms
-    update(dt) {
-        this.curT += dt;
+    // @param delta Delta time in ms
+    update(delta) {
+        this.curT += delta;
         // Update auto or manual
         if (this.mode === this.MODE_AUTO) {
-            this.updateAuto(this.curT / 1000.0, dt);
+            this.updateAuto(this.curT / 1000.0, delta);
         } else if (this.mode === this.MODE_FLY) {
-            this.updateDrone(NTS_INPUT.state, dt, this.world.droneHolder);
+            this.updateDrone(NTS_INPUT.state, delta, this.world.droneHolder);
         } else if (this.mode === this.MODE_MAN) {
-            this.updateManual(NTS_INPUT.state, dt);
+            this.updateManual(NTS_INPUT.state, delta);
         }
         // Calc cam look direction vector
+        // removing this does nothing,
+        // drone's taken over this?
+        /*
         var d = this.state.dir;
         d.z = Math.sin(this.state.pitch);
         var s = 1.0 - Math.abs(d.z);
         d.x = Math.cos(this.state.yaw) * s;
         d.y = Math.sin(this.state.yaw) * s;
+        */
     }
 
     nextMode() {
@@ -138,6 +142,14 @@ class NTS_PLAYER_C {
         return this.mode;
     }
 
+    getHeightAt(x, y) {
+        let groundHeight = Math.max(
+            NTS_HEIGHTFIELD.heightAt(this.HEIGHTFIELD, x, y, true),
+            this.WATERHEIGHT
+        );
+        return groundHeight
+    }
+
     /**
      * Update autoplay camera
      * @param time Time in seconds
@@ -146,8 +158,8 @@ class NTS_PLAYER_C {
      * @param {Number} dt
      * @returns {null}
      */
-    updateAuto(time, dt) {
-        var ft = dt / 1000.0;
+    updateAuto(time, delta) {
+        var milliDelta = delta / 1000.0;
 
         // Remember last frame values
         NTS_VEC.Vec3.copy(this.state.pos, this._a);
@@ -200,7 +212,7 @@ class NTS_PLAYER_C {
             floatVel *= 0.25; // can sink more slowly
         }
 
-        this.state.floatHeight += floatVel * this.FLOAT_VEL * ft;
+        this.state.floatHeight += floatVel * this.FLOAT_VEL * milliDelta;
 
         // Make absolutely sure we're above ground
         if (this.state.floatHeight < groundHeight) {
@@ -214,14 +226,14 @@ class NTS_PLAYER_C {
         this._d.x = this.state.pos.x - this._a.x;
         this._d.y = this.state.pos.y - this._a.y;
         this._d.z = this.state.pos.z - this._a.z;
-        this.state.vel.x = this._d.x / ft;
-        this.state.vel.y = this._d.y / ft;
+        this.state.vel.x = this._d.x / milliDelta;
+        this.state.vel.y = this._d.y / milliDelta;
 
-        this.state.vel.z = this._d.z / ft;
+        this.state.vel.z = this._d.z / milliDelta;
         var dyaw = this.state.yaw - yaw0;
-        this.state.yawVel = dyaw / ft;
+        this.state.yawVel = dyaw / milliDelta;
         var dpitch = this.state.pitch - pitch0;
-        this.state.pitchVel = dpitch / ft;
+        this.state.pitchVel = dpitch / milliDelta;
     }
 
     autoPos(r, p) {
@@ -230,9 +242,9 @@ class NTS_PLAYER_C {
     }
 
     // Drone-like physics
-    updateDrone(i, dt, drone) {
+    updateDrone(i, delta, drone) {
         // Delta time in seconds
-        var ft = dt / 1000.0;
+        var milliDelta = delta / 1000.0;
         // calc roll accel
         var ra = 0;
 
@@ -248,8 +260,8 @@ class NTS_PLAYER_C {
 
         // total roll accel
         ra = ra + rr + rf;
-        this.state.rollVel += ra * ft;
-        this.state.roll += this.state.rollVel * ft;
+        this.state.rollVel += ra * milliDelta;
+        this.state.roll += this.state.rollVel * milliDelta;
 
         if (i.pitchup) {
             this.state.pitchVel = this.MAN_PITCHVEL;
@@ -264,8 +276,8 @@ class NTS_PLAYER_C {
         var yd = -NTS_GMATH.sign(this.state.yawVel) * Math.abs(Math.pow(this.state.yawVel, 3.0)) * this.YAW_DRAG;
 
         // update yaw
-        this.state.yawVel += (ya + yd) * ft;
-        this.state.yaw += this.state.yawVel * ft;
+        this.state.yawVel += (ya + yd) * milliDelta;
+        this.state.yaw += this.state.yawVel * milliDelta;
 
         // Calc pitch accel
         var pa = 0;
@@ -280,8 +292,8 @@ class NTS_PLAYER_C {
 
         // total pitch accel
         pa = pa + pr + pf;
-        this.state.pitchVel += pa * ft;
-        this.state.pitch += this.state.pitchVel * ft;
+        this.state.pitchVel += pa * milliDelta;
+        this.state.pitch += this.state.pitchVel * milliDelta;
 
         // Calc accel vector
         NTS_VEC.Vec3.set(this._a, 0, 0, 0);
@@ -304,14 +316,14 @@ class NTS_PLAYER_C {
         this._d.z = -this.state.vel.z * this.VDRAG;
 
         // update vel
-        this.state.vel.x += (this._a.x + this._d.x) * ft;
-        this.state.vel.y += (this._a.y + this._d.y) * ft;
-        this.state.vel.z += (this._a.z + this._d.z) * ft;
+        this.state.vel.x += (this._a.x + this._d.x) * milliDelta;
+        this.state.vel.y += (this._a.y + this._d.y) * milliDelta;
+        this.state.vel.z += (this._a.z + this._d.z) * milliDelta;
 
         // update pos
-        this.state.pos.x += this.state.vel.x * ft;
-        this.state.pos.y += this.state.vel.y * ft;
-        this.state.pos.z += this.state.vel.z * ft;
+        this.state.pos.x += this.state.vel.x * milliDelta;
+        this.state.pos.y += this.state.vel.y * milliDelta;
+        this.state.pos.z += this.state.vel.z * milliDelta;
 
         var groundHeight = Math.max(
             NTS_HEIGHTFIELD.heightAt(this.HEIGHTFIELD, this.state.pos.x, this.state.pos.y, true),
@@ -328,8 +340,8 @@ class NTS_PLAYER_C {
     }
 
     // Manual movement
-    updateManual(i, dt) {
-        var ft = dt / 1000.0;
+    updateManual(i, delta) {
+        var milliDelta = delta / 1000.0;
         this.state.yawVel = 0;
 
         if (i.left) {
@@ -338,7 +350,7 @@ class NTS_PLAYER_C {
             this.state.yawVel = -this.MAN_YAWVEL;
         }
 
-        this.state.yaw += this.state.yawVel * ft;
+        this.state.yaw += this.state.yawVel * milliDelta;
         this.state.pitchVel = 0;
 
         if (i.pitchup) {
@@ -347,7 +359,7 @@ class NTS_PLAYER_C {
             this.state.pitchVel = -this.MAN_PITCHVEL;
         }
 
-        this.state.pitch += this.state.pitchVel * ft;
+        this.state.pitch += this.state.pitchVel * milliDelta;
         this.state.pitch = NTS_GMATH.clamp(this.state.pitch, -this.MAN_MAXPITCH, this.MAN_MAXPITCH);
         NTS_VEC.Vec3.set(this.state.vel, 0, 0, 0);
 
@@ -359,8 +371,8 @@ class NTS_PLAYER_C {
             this.state.vel.y = -this.MAN_VEL * Math.sin(this.state.yaw);
         }
 
-        this.state.pos.x += this.state.vel.x * ft;
-        this.state.pos.y += this.state.vel.y * ft;
+        this.state.pos.x += this.state.vel.x * milliDelta;
+        this.state.pos.y += this.state.vel.y * milliDelta;
 
         if (i.up) {
             this.state.vel.z = this.MAN_ZVEL;
@@ -368,7 +380,7 @@ class NTS_PLAYER_C {
             this.state.vel.z = -this.MAN_ZVEL;
         }
 
-        this.state.pos.z += this.state.vel.z * ft;
+        this.state.pos.z += this.state.vel.z * milliDelta;
 
         var groundHeight = Math.max(
             NTS_HEIGHTFIELD.heightAt(this.HEIGHTFIELD, this.state.pos.x, this.state.pos.y, true),
