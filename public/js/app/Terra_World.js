@@ -77,15 +77,15 @@ export class Terra_World {
 
         // Setup the camera so Z is up.
         // Then we have cartesian X,Y coordinates along ground plane.
-        this.camera.rotation.order = "ZXY";
-        this.camera.rotation.x = Math.PI * 0.5;
-        this.camera.rotation.y = Math.PI * 0.5;
-        this.camera.rotation.z = Math.PI;
+        //this.camera.rotation.order = "ZXY";
+        //this.camera.rotation.x = Math.PI;
+        this.camera.rotation.y = -Math.PI/2;
+        this.camera.rotation.x = Math.PI/2;
         this.camera.up.set(0.0, 0.0, 1.0);
 
         // Put camera in an object so we can transform it normally
         this.camHolder = new THREE.Object3D();
-        this.camHolder.rotation.order = "ZYX";
+        //this.camHolder.rotation.order = "ZYX";
         this.camHolder.add(this.camera);
         this.scene.add(this.camHolder);
 
