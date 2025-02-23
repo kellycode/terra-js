@@ -6,13 +6,13 @@ import { Water } from "three/addons/objects/Water2.js";
 export class Terra_Water {
     constructor() {
         this.water;
-
         this.waterConfig = {
             renderOrder: 40,
             width: 2000.0,
             height: 2000.0,
             x: 0,
-            y: 0
+            y: 0,
+            z: 0,
         };
     }
 
@@ -33,15 +33,23 @@ export class Terra_Water {
             flowDirection: new THREE.Vector2(params.flowX, params.flowY),
             textureWidth: 1024,
             textureHeight: 1024,
-            reflectivity: 0.75
+            reflectivity: 0.75,
         });
 
-        this.water.position.x = this.waterConfig.x;;
-        this.water.position.y = this.waterConfig.y;
-        this.water.position.z = 55;//waterLevel;
+        this.water.position.x = this.waterConfig.x;
+        this.water.position.y = waterLevel;//this.waterConfig.y;
+        this.water.position.z = this.waterConfig.z;
+
+        this.water.rotation.x = -Math.PI / 2;
 
         this.water.renderOrder = this.waterConfig.renderOrder;
-        scene.add(this.water);
-        console.log("done " + waterLevel );
+        return this.water;
+    }
+
+    update() {
+        //this.water.position.y += 0.11;
+        console.log(this.water.position.y)
+        //this.water.rotation.y += 0.1;ddd
+        //this.water.rotation.z += 0.1;
     }
 }

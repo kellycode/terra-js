@@ -36,6 +36,7 @@ export class Terra_World {
         this.WIND_DEFAULT = 1.5;
         this.WIND_MAX = 3.0;
         this.MAX_GLARE = 0.25; // max glare effect amount
+        
         this.GLARE_RANGE = 1.1; // angular range of effect
         this.GLARE_YAW = Math.PI * 1.5; // yaw angle when looking directly at sun
         this.GLARE_PITCH = 0.2; // pitch angle looking at sun
@@ -61,8 +62,6 @@ export class Terra_World {
         this.fogDist = this.GRASS_PITCH_RADIUS * 20.0;
         this.grassFogDist = this.GRASS_PITCH_RADIUS * 2.0;
 
-        this.camera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 1.0, this.VIEW_DEPTH);
-
         this.meshes = {
             terrain: null,
             grass: null,
@@ -75,19 +74,17 @@ export class Terra_World {
         this.scene = new THREE.Scene();
         this.scene.fog = new THREE.Fog(Terra_Vec.Color.to24bit(this.FOG_COLOR), 0.1, this.fogDist);
 
-        // Setup the camera so Z is up.
-        // Then we have cartesian X,Y coordinates along ground plane.
-        //this.camera.rotation.order = "ZXY";
-        //this.camera.rotation.x = Math.PI;
-        this.camera.rotation.y = -Math.PI/2;
-        this.camera.rotation.x = Math.PI/2;
-        this.camera.up.set(0.0, 0.0, 1.0);
+        this.camera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 1.0, this.VIEW_DEPTH);
+        this.camera.rotation.y = 0;//Math.PI/2;
+        this.camera.rotation.x = 0;//-Math.PI;
+        this.camera.up.set(0.0, 1.0, .0);
+        this.camera.name = "player_camera";
 
         // Put camera in an object so we can transform it normally
         this.camHolder = new THREE.Object3D();
-        //this.camHolder.rotation.order = "ZYX";
         this.camHolder.add(this.camera);
         this.scene.add(this.camHolder);
+
 
         // Setup heightfield
         this.hfImg = assets.images["heightmap"];
@@ -124,12 +121,15 @@ export class Terra_World {
         });
 
         this.meshes.terrain = this.terra.mesh;
+        //rotate it so up is Y
+        this.meshes.terrain.rotation.x = -Math.PI/2;
         this.meshes.terrain.renderOrder = 20;
         this.scene.add(this.meshes.terrain);
 
         // skydome and water
         this.meshes.sky = Terra_Skydome.createMesh(assets.textures["skydome"], this.VIEW_DEPTH * 0.95);
         this.meshes.sky.renderOrder = 30;
+        this.meshes.sky.rotation.x = -Math.PI/2;
         this.scene.add(this.meshes.sky);
         this.meshes.sky.position.z = -25.0;
 
@@ -166,13 +166,14 @@ export class Terra_World {
             })
         );
         this.meshes.sunFlare.position.x = 2.05;
-        this.meshes.sunFlare.rotation.y = Math.PI * 1.5;
-        this.meshes.sunFlare.visible = false;
+        this.meshes.sunFlare.rotation.z = Math.PI * 1.5;
+        this.meshes.sunFlare.visible = true;
         this.meshes.sunFlare.renderOrder = 20;
         this.camHolder.add(this.meshes.sunFlare);
 
         // Create a Player instance
         this.player = new Terra_Player(this.heightField, this.WATER_LEVEL, this);
+        this.player.state.yaw = Math.PI * 0.75;
 
         // For timing
         this.prevT = Date.now(); // prev frame time (ms)
@@ -186,8 +187,9 @@ export class Terra_World {
             r: Math.PI / 10,
         };
 
-        let wm = new Terra_Water();
-        wm.createWater(this.scene, this.WATER_LEVEL);
+        this.wm = new Terra_Water();
+        this.water = this.wm.createWater(this.scene, this.WATER_LEVEL);
+        this.scene.add(this.water);
 
         Terra_Input.setWheelListener(
             "wlOne",
@@ -305,6 +307,8 @@ export class Terra_World {
             this.updateFade(dt);
         }
 
+        this.wm.update();
+
         this.simT += dt;
 
         let t = this.simT * 0.001;
@@ -312,11 +316,11 @@ export class Terra_World {
         // Move player (viewer)
         this.player.update(dt);
 
-        let ppos = this.player.state.pos;
-        let pdir = this.player.state.dir;
         let pyaw = this.player.state.yaw;
-        let ppitch = this.player.state.pitch;
+        let ppos = this.player.state.pos;
+        let pdir = pyaw % Math.PI;
         let proll = this.player.state.roll;
+        let ppitch = this.player.state.pitch;
 
         Terra_Heightfield.infoAt(this.heightField, ppos.x, ppos.y, true, this._hinfo);
 
@@ -330,12 +334,8 @@ export class Terra_World {
                     ppos.y.toFixed(4) +
                     " z:" +
                     ppos.z.toFixed(4) +
-                    " dx:" +
-                    pdir.x.toFixed(4) +
-                    " dy:" +
-                    pdir.y.toFixed(4) +
                     " dz:" +
-                    pdir.z.toFixed(4) +
+                    pdir.toFixed(4) +
                     " height:" +
                     groundHeight.toFixed(4) +
                     " i:" +
@@ -347,16 +347,17 @@ export class Terra_World {
 
         // Move skydome with player
         this.meshes.sky.position.x = ppos.x;
-        this.meshes.sky.position.y = ppos.y;
+        this.meshes.sky.position.z = ppos.z;
         //Terra_Terrain.update(this.terra, ppos.x, ppos.y);
 
         // Update camera location/orientation
         Terra_Vec.Vec3.copy(ppos, this.camHolder.position);
-        //camHolder.position.z = ppos.z + groundHeight
-        this.camHolder.rotation.z = pyaw;
-        // Player considers 'up' pitch positive, but cam pitch (about Y) is reversed
-        this.camHolder.rotation.y = -ppitch;
-        this.camHolder.rotation.x = proll;
+
+        // z would be the new roll
+        // currently fixed at 0.0
+        this.camHolder.rotation.z = proll;
+        this.camHolder.rotation.y = -pyaw;
+        this.camera.rotation.x = ppitch;
 
         // Update sun glare effect
         // not really used
@@ -365,15 +366,16 @@ export class Terra_World {
 
     // Update how much glare effect by how much we're looking at the sun
     updateGlare() {
-        let dy = Math.abs(Terra_Math.difAngle(this.GLARE_YAW, this.player.state.yaw));
-        let dp = Math.abs(Terra_Math.difAngle(this.GLARE_PITCH, this.player.state.pitch)) * 1.75;
+        this.GLARE_PITCH += 0.1;
+        let dy = Math.abs(Terra_Math.difAngle(this.GLARE_YAW, this.player.state.roll));
+        let dp = Math.abs(Terra_Math.difAngle(this.GLARE_PITCH, this.player.state.roll)) * 1.75;
         let sunVisAngle = Math.sqrt(dy * dy + dp * dp);
         if (sunVisAngle < this.GLARE_RANGE) {
             let glare = this.MAX_GLARE * Math.pow((this.GLARE_RANGE - sunVisAngle) / (1.0 + this.MAX_GLARE), 0.75);
             this.meshes.sunFlare.material.opacity = Math.max(0.0, glare);
             this.meshes.sunFlare.visible = true;
         } else {
-            this.meshes.sunFlare.visible = false;
+            this.meshes.sunFlare.visible = true;
         }
     }
 
