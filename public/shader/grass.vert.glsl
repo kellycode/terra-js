@@ -57,6 +57,7 @@ void main() {
 	float hpct = di / BLADE_SEGS;  // percent of height of blade this vertex is at
 	float bside = floor(vindex / BLADE_VERTS);  // front/back side of blade
 	float bedge = mod(vi, 2.0);  // left/right edge (x=0 or x=1)
+
 	// Vertex position - start with 2D shape, no bend applied
 	vec3 vpos = vec3(
 		shape.x * (bedge - 0.5) * (1.0 - pow(hpct, 3.0)), // taper blade edges as approach tip
@@ -69,12 +70,15 @@ void main() {
 
 	// Apply blade's natural curve amount
 	float curve = shape.w;
+
 	// Then add animated curve amount by time using this blade's
 	// unique properties to randomize its oscillation
 	curve += shape.w + 0.125 * (sin(time * 4.0 + offset.w * 0.2 * shape.y + offset.x + offset.y));
+
 	// put lean and curve together
 	float rot = shape.z + curve * hpct;
 	vec2 rotv = vec2(cos(rot), sin(rot));
+
 	vpos.yz = rotate(vpos.y, vpos.z, rotv);
 	normal.yz = rotate(normal.y, normal.z, rotv);
 
@@ -98,6 +102,7 @@ void main() {
 	// Compute wind effect
 	// Using the lighting channel as noise seems make the best looking wind for some reason!
 	float wind = texture2D(heightMap, vec2(vSamplePos.x - time / 2500.0, vSamplePos.y - time / 200.0) * 6.0).g;
+
 	//float wind = texture2D(heightMap, vec2(vSamplePos.x - time / 2500.0, vSamplePos.y - time / 100.0) * 6.0).r;
 	//float wind = texture2D(heightMap, vec2(vSamplePos.x - time / 2500.0, vSamplePos.y - time / 100.0) * 4.0).b;
 	// Apply some exaggeration to wind
@@ -107,6 +112,7 @@ void main() {
 	wind *= hpct; // scale wind by height of blade
 	wind = -wind;
 	rotv = vec2(cos(wind), sin(wind));
+
 	// Wind blows in axis-aligned direction to make things simpler
 	vpos.yz = rotate(vpos.y, vpos.z, rotv);
 	normal.yz = rotate(normal.y, normal.z, rotv);
@@ -133,8 +139,10 @@ void main() {
 	float specMag = max(-dot(normal, lightDir), 0.0) * max(-dot(normal, camDir), 0.0);
 	specMag = pow(specMag, 1.5); // * specMag * specMag;
 	vec3 specular = specMag * SPECULAR_COLOR * 0.4;
+
 	// Directional plus ambient
 	float light = 0.35 * diffuse + 0.65;
+	
 	// Ambient occlusion shading - the lower vertex, the darker
 	float heightLight = 1.0 - hpct;
 	heightLight = heightLight * heightLight;

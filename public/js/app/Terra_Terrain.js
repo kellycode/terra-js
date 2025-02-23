@@ -55,18 +55,24 @@ export class Terra_Terrain {
         var yCellCount = xCellCount;
         var cellSize = 1.0 / opts.heightMapScale.x / xCellCount;
         var texs = opts.textures;
+
         texs.forEach(function (tex) {
             tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
             tex.anisotropy = 9;
         });
+
         var htex = opts.heightMap;
+
         htex.wrapS = htex.wrapT = THREE.RepeatWrapping;
+
         var vtxBufs = this.createVtxBuffers(cellSize, xCellCount + 1, yCellCount + 1);
         var idBuf = this.createIdBuffer(xCellCount + 1, yCellCount + 1);
         var geo = new THREE.BufferGeometry();
+
         geo.setAttribute('position', new THREE.BufferAttribute(vtxBufs.position, 3));
         geo.setAttribute('uv', new THREE.BufferAttribute(vtxBufs.uv, 2));
         geo.setIndex(new THREE.BufferAttribute(idBuf, 1));
+
         var hscale = opts.heightMapScale;
         var fragScript = opts.fragScript.replace('%%TRANSITION_LOW%%', opts.transitionLow.toString()).replace('%%TRANSITION_HIGH%%', opts.transitionHigh.toString());
         var mat = new THREE.RawShaderMaterial({
@@ -85,8 +91,11 @@ export class Terra_Terrain {
             vertexShader: opts.vertScript,
             fragmentShader: fragScript
         });
+
         var mesh = new THREE.Mesh(geo, mat);
+
         mesh.frustumCulled = false;
+        
         return mesh;
     };
 
