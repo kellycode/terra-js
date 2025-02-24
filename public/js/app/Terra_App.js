@@ -133,7 +133,8 @@ export class Terra_App {
                     { name: "terrain1", url: "data/terrain1.jpg" },
                     { name: "terrain2", url: "data/terrain2.jpg" },
                     { name: "skydome", url: "data/skydome.jpg" },
-                    { name: "skyenv", url: "data/skyenv.jpg" }
+                    { name: "skyenv", url: "data/skyenv.jpg" },
+                    { name: "snow", url: "data/snow_ground.jpg" }
                 ],
                 models: [],
             },

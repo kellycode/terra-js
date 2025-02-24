@@ -16,6 +16,7 @@ import { Terra_Water } from "./Terra_Water.js";
 import { Terra_FPS } from "./Terra_FPS.js";
 import { Terra_Player } from "./Terra_Player.js";
 import { Terra_Grass } from "./Terra_Grass.js";
+import { Terra_Terrain_Fake } from "./Terra_Terrain_Fake.js"
 
 export class Terra_World {
     // Create a World instance
@@ -54,7 +55,7 @@ export class Terra_World {
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
             antialias: antialias,
-            clearColor: 0xffffff,
+            clearColor: 0xff0000,
             clearAlpha: 1,
             alpha: true,
         });
@@ -88,8 +89,12 @@ export class Terra_World {
         // Put camera in an object so we can transform it normally
         this.camHolder = new THREE.Object3D();
         this.camHolder.add(this.camera);
+        this.camHolder.name = 'camHolder';
         this.scene.add(this.camHolder);
-
+        
+        this.windIntensity = this.WIND_DEFAULT;
+        
+        // TERRAIN TERRAIN TERRAIN TERRAIN TERRAIN TERRAIN TERRAIN TERRAIN TERRAIN TERRAIN TERRAIN TERRAIN TERRAIN TERRAIN TERRAIN
 
         // Setup heightfield
         this.hfImg = assets.images["heightmap"];
@@ -109,9 +114,32 @@ export class Terra_World {
         this.hfImg = undefined;
 
         this.terraMap = Terra_Terramap.createTexture(this.heightField, this.LIGHT_DIR, assets.images["noise"]);
-        this.windIntensity = this.WIND_DEFAULT;
+        // Terrain mesh
+        this.terra = Terra_Terrain.Terrain({
+            textures: [assets.textures["terrain1"], assets.textures["terrain2"]],
+            vertScript: assets.text["terrain.vert"],
+            fragScript: assets.text["terrain.frag"],
+            heightMap: this.terraMap,
+            heightMapScale: this.heightMapScale,
+            fogColor: this.FOG_COLOR,
+            fogFar: this.fogDist,
+            grassFogFar: this.grassFogDist,
+            transitionLow: this.BEACH_TRANSITION_LOW,
+            transitionHigh: this.BEACH_TRANSITION_HIGH,
+        }, this.scene);
 
-        // GRASS
+        this.meshes.terrain = this.terra.mesh;
+        //rotate it so up is Y
+        this.meshes.terrain.rotation.x = -Math.PI/2;
+        this.meshes.terrain.renderOrder = 20;
+        this.meshes.terrain.name = 'terrain';
+        this.scene.add(this.meshes.terrain);
+
+
+        this.f_terrain = new Terra_Terrain_Fake(this.scene, assets);
+        
+
+        // GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS
         // Create a large patch of grass to fill the foreground
         
         this.grass = new Terra_Grass();
@@ -136,33 +164,21 @@ export class Terra_World {
         this.meshes.grass.renderOrder = 10;
         this.meshes.grass.rotation.x = -Math.PI/2;
         this._v = Terra_Vec.Vec2.create(0.0, 0.0);
+        this.meshes.grass.name = 'grass';
         this.scene.add(this.meshes.grass);
-        
 
-        // Terrain mesh
-        this.terra = Terra_Terrain.Terrain({
-            textures: [assets.textures["terrain1"], assets.textures["terrain2"]],
-            vertScript: assets.text["terrain.vert"],
-            fragScript: assets.text["terrain.frag"],
-            heightMap: this.terraMap,
-            heightMapScale: this.heightMapScale,
-            fogColor: this.FOG_COLOR,
-            fogFar: this.fogDist,
-            grassFogFar: this.grassFogDist,
-            transitionLow: this.BEACH_TRANSITION_LOW,
-            transitionHigh: this.BEACH_TRANSITION_HIGH,
-        });
+        // WATER WATER WATER WATER WATER WATER WATER WATER WATER WATER WATER WATER WATER WATER WATER WATER WATER WATER WATER WATER
+        this.terraWater = new Terra_Water();
+        this.meshes.water = this.terraWater.createWater(this.scene, this.WATER_LEVEL);
+        this.meshes.water.name = 'water';
+        this.scene.add(this.meshes.water );
 
-        this.meshes.terrain = this.terra.mesh;
-        //rotate it so up is Y
-        this.meshes.terrain.rotation.x = -Math.PI/2;
-        this.meshes.terrain.renderOrder = 20;
-        this.scene.add(this.meshes.terrain);
 
         // skydome and water
         this.meshes.sky = Terra_Skydome.createMesh(assets.textures["skydome"], this.VIEW_DEPTH * 0.95);
         this.meshes.sky.renderOrder = 30;
         this.meshes.sky.rotation.x = -Math.PI/2;
+        this.meshes.sky.name = 'sky';
         this.scene.add(this.meshes.sky);
         this.meshes.sky.position.z = -25.0;
 
@@ -220,10 +236,7 @@ export class Terra_World {
             r: Math.PI / 10,
         };
 
-        this.terraWater = new Terra_Water();
-        this.meshes.water = this.terraWater.createWater(this.scene, this.WATER_LEVEL);
-        this.scene.add(this.meshes.water );
-
+        
         Terra_Input.setWheelListener(
             "wlOne",
             function (e, delta) {
@@ -299,6 +312,8 @@ export class Terra_World {
 
         this._hinfo = Terra_Heightfield.HInfo();
         this._v = Terra_Vec.Vec2.create(0.0, 0.0);
+
+        this.mod = 0;
     }
 
     // Call every frame
@@ -340,6 +355,8 @@ export class Terra_World {
             this.updateFade(dt);
         }
 
+        //this.f_terrain.GROUND_DATA.MESH.position.y -= 0.01;
+
         this.simT += dt;
 
         let nTime = this.simT * 0.001;
@@ -353,10 +370,6 @@ export class Terra_World {
         let proll = this.player.state.roll;
         let ppitch = this.player.state.pitch;
 
-        Terra_Heightfield.infoAt(this.heightField, ppos.x, ppos.y, true, this._hinfo);
-
-        let groundHeight = this._hinfo.z;
-
         if (Terra_Logger.isVisible()) {
             Terra_Logger.setText(
                 "x:" +
@@ -368,7 +381,7 @@ export class Terra_World {
                     " dz:" +
                     pdir.toFixed(4) +
                     " height:" +
-                    groundHeight.toFixed(4) +
+                    this.player.groundHeight.toFixed(4) +
                     " i:" +
                     this._hinfo.i +
                     " fps:" +
@@ -379,7 +392,6 @@ export class Terra_World {
         // Move skydome with player
         this.meshes.sky.position.x = ppos.x;
         this.meshes.sky.position.z = ppos.z;
-        //Terra_Terrain.update(this.terra, ppos.x, ppos.y);
 
         // Update camera location/orientation
         Terra_Vec.Vec3.copy(ppos, this.camHolder.position);

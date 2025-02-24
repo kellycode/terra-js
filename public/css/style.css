@@ -29,6 +29,19 @@ a:hover {
     color: #333;
 }
 
+#heightmap_canvas {
+    display: none;
+}
+
+#heightmap_image {
+    display: none;
+}
+
+#pattern_canvas {
+    position: relative;
+    display: none;
+}
+
 button {
     font-size: 1.25em;
     font-weight: bold;

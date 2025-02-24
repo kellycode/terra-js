@@ -3,10 +3,9 @@
 
 "use strict";
 
-import { Terra_Math } from "./Terra_Math.js"
+import * as THREE from "three";
 import { Terra_Vec } from "./Terra_Vec.js"
 import { Terra_Input } from "./Terra_Input.js"
-import { Terra_Heightfield } from "./Terra_Heightfield.js"
 
 // Creates a Player instance
 // (User first person camera)
@@ -16,8 +15,8 @@ export class Terra_Player {
         this.WATERHEIGHT = waterHeight;
 
         this.DEFAULT_HEIGHT = 0.0;
-        this.MIN_HEIGHT = 2.5;
-        this.MAX_HEIGHT = 275.0;
+        this.MIN_HEIGHT = -20;
+        this.MAX_HEIGHT = 300.0;
         this.FLOAT_VEL = 0.75;
         this.BOB_RANGE = 16.0;
         this.DEFAULT_PITCH = -0.325;
@@ -34,7 +33,7 @@ export class Terra_Player {
         this.ROLL_ACCEL = 2.0;
         this.ROLL_RESIST = 10.0;
         this.ROLL_FRIC = 8.0;
-        this.MAN_VEL = 40.0;
+        this.MAN_VEL = 100.0;
         this.MAN_ZVEL = 10.0;
         this.MAN_YAWVEL = 0.5;
         this.MAN_PITCHVEL = 1.0;
@@ -47,7 +46,7 @@ export class Terra_Player {
 
         this.curT = 0;
         this.state = {
-            pos: Terra_Vec.Vec3.create(0.0, 0.0, this.DEFAULT_HEIGHT),
+            pos: Terra_Vec.Vec3.create(0.0, 100, 0.0),
             vel: Terra_Vec.Vec3.create(0.0, 0.0, 0.0),
             dir: Terra_Vec.Vec3.create(1.0, 0.0, 0.0),
             yaw: 0.0,
@@ -62,7 +61,10 @@ export class Terra_Player {
             pitch: 0.0
         };
 
-        title_bar_left
+        this.raycaster = new THREE.Raycaster();
+        this.DOWN_VECTOR = new THREE.Vector3(0, -1, 0);
+        this.RAYCASTER_HEIGHT = 100;
+        this.groundHeight;
 
         this.setModeText = function(mode) {
             document.getElementById("title_bar_left").textContent = mode;
@@ -108,8 +110,6 @@ export class Terra_Player {
             }
         }
 
-        //Terra_Vec.Vec3.set(this.state.vel, 0, 0, 0);
-
         if (input.forward) { // W
             this.state.pos.z -= this.MAN_VEL * Math.cos(-this.state.yaw) * ft;
             this.state.pos.x -= this.MAN_VEL * Math.sin(-this.state.yaw) * ft;
@@ -124,15 +124,23 @@ export class Terra_Player {
             this.state.pos.y -= this.MAN_ZVEL * ft;
         }
 
-        var groundHeight = Math.max(
-            Terra_Heightfield.heightAt(this.HEIGHTFIELD, this.state.pos.z, this.state.pos.y, true),
-            this.WATERHEIGHT
-        );
+        let castFrom = new THREE.Vector3(this.state.pos.x, this.state.pos.y + 100, this.state.pos.z);
+        this.raycaster.set(castFrom, this.DOWN_VECTOR);
+        let intersects = this.raycaster.intersectObject(this.world.f_terrain.GROUND_DATA.MESH);
 
-        if (this.state.pos.y < groundHeight + this.MIN_HEIGHT) {
-            this.state.pos.y = groundHeight + this.MIN_HEIGHT;
-        } else if (this.state.pos.z > this.MAX_HEIGHT) {
+        if (intersects.length > 0) {
+            if(intersects[0].object.name === "fake_ground") {
+                 this.groundHeight = intersects[0].point.y;
+                //this.state.pos.y = groundHeight + 10;
+            }
+        }
+
+        if (this.state.pos.y < this.MIN_HEIGHT) {
+            this.state.pos.y = this.MIN_HEIGHT;
+        } else if (this.state.pos.y > this.MAX_HEIGHT) {
             this.state.pos.y = this.MAX_HEIGHT;
+        } else {
+            this.state.pos.y =  this.groundHeight + 10;
         }
     }
 }

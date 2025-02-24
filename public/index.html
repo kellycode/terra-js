@@ -29,7 +29,7 @@
     <body>
         <div id="content_container">
             <div id="app_container">
-                <div id="app_canvas_container"><canvas id="app_canvas" style="background: #000"></canvas></div>
+                <div id="app_canvas_container"><canvas id="app_canvas" style="background: #ffffff"></canvas></div>
 
                 <div id="app_ui_container">
                     <div id="title_bar" style="display: none">
@@ -81,6 +81,10 @@
                 </div>
             </div>
         </div>
+
+        <img id="heightmap_image" src="data/heightmap.jpg" alt="Heightmap" height="101" width="101" />
+        <canvas id="heightmap_canvas"></canvas>
+        <canvas id="pattern_canvas" width="1000" height="1000"></canvas>
 
         <script type="module">
             import { Terra_App } from "./js/app/Terra_App.js";

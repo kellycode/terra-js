@@ -229,7 +229,7 @@ export class Terra_Heightfield {
     
     static heightAt (hf, x, y, wrap) {
         this._hi = this.HInfo();
-        if (wrap === void 0) { wrap = false; }
+       //if (wrap === void 0) { wrap = false; }
         this.infoAt(hf, x, y, wrap, this._hi);
         return this._hi.z;
     };

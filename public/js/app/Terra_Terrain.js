@@ -9,14 +9,13 @@
 // distance.
 // Uses terrain shaders (see: shader/terrain.*.glsl)
 import * as THREE from "three";
-import { Terra_Vec } from "./Terra_Vec.js"
+import { Terra_Vec } from "./Terra_Vec.js";
 
 export class Terra_Terrain {
-
     static MAX_INDICES = 262144; // 65536
     static TEX_SCALE = 1.0 / 2.0; // texture scale per quad was 1/6
 
-    static Terrain (opts) {
+    static Terrain(opts) {
         // max square x,y divisions that will fit in max indices
         var xCellCount = Math.floor(Math.sqrt(this.MAX_INDICES / (3 * 2)));
         var yCellCount = xCellCount;
@@ -27,29 +26,29 @@ export class Terra_Terrain {
             yCellCount: yCellCount,
             xSize: xCellCount * cellSize,
             ySize: yCellCount * cellSize,
-            mesh: this.createMesh(opts)
+            mesh: this.createMesh(opts),
         };
-    };
-    
+    }
+
     // no idea why this update is needed
-    static update (t, x, y) {
+    static update(t, x, y) {
         var ix = Math.floor(x / t.cellSize);
         var iy = Math.floor(y / t.cellSize);
         var ox = ix * t.cellSize;
         var oy = iy * t.cellSize;
         var mat = t.mesh.material;
-        var p = mat.uniforms['offset'].value;
+        var p = mat.uniforms["offset"].value;
         p[0] = ox;
         p[1] = oy;
-        p = mat.uniforms['uvOffset'].value;
+        p = mat.uniforms["uvOffset"].value;
         p[0] = iy * this.TEX_SCALE; // not sure why x,y need to be swapped here...
         p[1] = ix * this.TEX_SCALE;
-    };
-    
+    }
+
     // Internal helpers...
     // Creates a textured plane larger
     // than the viewer will ever travel
-    static createMesh (opts) {
+    static createMesh(opts) {
         // max x,y divisions that will fit 65536 indices
         var xCellCount = Math.floor(Math.sqrt(this.MAX_INDICES / (3 * 2)));
         var yCellCount = xCellCount;
@@ -69,42 +68,44 @@ export class Terra_Terrain {
         var idBuf = this.createIdBuffer(xCellCount + 1, yCellCount + 1);
         var geo = new THREE.BufferGeometry();
 
-        geo.setAttribute('position', new THREE.BufferAttribute(vtxBufs.position, 3));
-        geo.setAttribute('uv', new THREE.BufferAttribute(vtxBufs.uv, 2));
+        geo.setAttribute("position", new THREE.BufferAttribute(vtxBufs.position, 3));
+        geo.setAttribute("uv", new THREE.BufferAttribute(vtxBufs.uv, 2));
         geo.setIndex(new THREE.BufferAttribute(idBuf, 1));
 
         var hscale = opts.heightMapScale;
-        var fragScript = opts.fragScript.replace('%%TRANSITION_LOW%%', opts.transitionLow.toString()).replace('%%TRANSITION_HIGH%%', opts.transitionHigh.toString());
+        var fragScript = opts.fragScript
+            .replace("%%TRANSITION_LOW%%", opts.transitionLow.toString())
+            .replace("%%TRANSITION_HIGH%%", opts.transitionHigh.toString());
         var mat = new THREE.RawShaderMaterial({
             uniforms: {
-                offset: {type: '2f', value: [0.0, 0.0]},
-                uvOffset: {type: '2f', value: [0.0, 0.0]},
-                map1: {type: 't', value: texs[0]},
-                map2: {type: 't', value: texs[1]},
-                heightMap: {type: 't', value: htex},
-                heightMapScale: {type: '3f', value: [hscale.x, hscale.y, hscale.z]},
-                fogColor: {type: '3f', value: Terra_Vec.Color.toArray(opts.fogColor)},
-                fogNear: {type: 'f', value: 1.0},
-                fogFar: {type: 'f', value: opts.fogFar},
-                grassFogFar: {type: 'f', value: opts.grassFogFar}
+                offset: { type: "2f", value: [0.0, 0.0] },
+                uvOffset: { type: "2f", value: [0.0, 0.0] },
+                map1: { type: "t", value: texs[0] },
+                map2: { type: "t", value: texs[1] },
+                heightMap: { type: "t", value: htex },
+                heightMapScale: { type: "3f", value: [hscale.x, hscale.y, hscale.z] },
+                fogColor: { type: "3f", value: Terra_Vec.Color.toArray(opts.fogColor) },
+                fogNear: { type: "f", value: 1.0 },
+                fogFar: { type: "f", value: opts.fogFar },
+                grassFogFar: { type: "f", value: opts.grassFogFar },
             },
             vertexShader: opts.vertScript,
-            fragmentShader: fragScript
+            fragmentShader: fragScript,
         });
 
-        var mesh = new THREE.Mesh(geo, mat);
+        var terrain_mesh = new THREE.Mesh(geo, mat);
 
-        mesh.frustumCulled = false;
-        
-        return mesh;
-    };
+        terrain_mesh.frustumCulled = false;
+
+        return terrain_mesh;
+    }
 
     /**
      * @param cellSize Size of each mesh cell (quad)
      * @param xcount X vertex count
      * @param ycount Y vertex count
      */
-    static createVtxBuffers (cellSize, xcount, ycount) {
+    static createVtxBuffers(cellSize, xcount, ycount) {
         var pos = new Float32Array(xcount * ycount * 3);
         var uv = new Float32Array(xcount * ycount * 2);
         var ix, iy;
@@ -125,14 +126,14 @@ export class Terra_Terrain {
                 uv[j++] = v * this.TEX_SCALE;
             }
         }
-        return {position: pos, uv: uv};
-    };
+        return { position: pos, uv: uv };
+    }
 
     /**
      * @param xcount X vertex count
      * @param ycount Y vertex count
      */
-    static createIdBuffer (xcount, ycount) {
+    static createIdBuffer(xcount, ycount) {
         var idSize = (xcount - 1) * (ycount - 1) * 3 * 2;
         var id;
         if (idSize <= 65536) {
@@ -158,10 +159,4 @@ export class Terra_Terrain {
         }
         return id;
     }
-};
-
-
-
-
-
-              
+}
