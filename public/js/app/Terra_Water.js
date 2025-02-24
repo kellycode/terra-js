@@ -47,9 +47,6 @@ export class Terra_Water {
     }
 
     update() {
-        //this.water.position.y += 0.11;
-        console.log(this.water.position.y)
-        //this.water.rotation.y += 0.1;ddd
-        //this.water.rotation.z += 0.1;
+
     }
 }

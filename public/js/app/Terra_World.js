@@ -15,10 +15,11 @@ import { Terra_Terramap } from "./Terra_Terramap.js";
 import { Terra_Water } from "./Terra_Water.js";
 import { Terra_FPS } from "./Terra_FPS.js";
 import { Terra_Player } from "./Terra_Player.js";
+import { Terra_Grass } from "./Terra_Grass.js";
 
 export class Terra_World {
     // Create a World instance
-    constructor(assets, displayWidth, displayHeight, antialias) {
+    constructor(assets, displayWidth, displayHeight, antialias, numGrassBlades, grassPatchRadius) {
         this.VIEW_DEPTH = 2000.0;
         this.MAX_TIMESTEP = 67; // max 67 ms/frame
         this.HEIGHTFIELD_SIZE = 3072.0;
@@ -26,6 +27,10 @@ export class Terra_World {
         this.WATER_LEVEL = this.HEIGHTFIELD_HEIGHT * 0.305556; // 55.0
         this.BEACH_TRANSITION_LOW = 0.31;
         this.BEACH_TRANSITION_HIGH = 0.36;
+
+        this.GRASS_PITCH_RADIUS = grassPatchRadius;
+        this.GRASS_COLOR = Terra_Vec.Color.create(0.45, 0.46, 0.19);
+        this.NUM_GRASS_BLADES = numGrassBlades;
 
         this.LIGHT_DIR = Terra_Vec.Vec3.create(0.0, 1.0, -1.0);
         Terra_Vec.Vec3.normalize(this.LIGHT_DIR, this.LIGHT_DIR);
@@ -105,6 +110,34 @@ export class Terra_World {
 
         this.terraMap = Terra_Terramap.createTexture(this.heightField, this.LIGHT_DIR, assets.images["noise"]);
         this.windIntensity = this.WIND_DEFAULT;
+
+        // GRASS
+        // Create a large patch of grass to fill the foreground
+        
+        this.grass = new Terra_Grass();
+        this.meshes.grass = this.grass.createMesh({
+            lightDir: this.LIGHT_DIR,
+            numBlades: this.NUM_GRASS_BLADES,
+            radius: this.GRASS_PITCH_RADIUS,
+            texture: assets.textures["grass"],
+            vertScript: assets.text["grass.vert"],
+            fragScript: assets.text["grass.frag"],
+            heightMap: this.terraMap,
+            heightMapScale: this.heightMapScale,
+            fogColor: this.FOG_COLOR,
+            fogFar: this.fogDist,
+            grassFogFar: this.grassFogDist,
+            grassColor: this.GRASS_COLOR,
+            transitionLow: this.BEACH_TRANSITION_LOW,
+            transitionHigh: this.BEACH_TRANSITION_HIGH,
+            windIntensity: this.windIntensity,
+        });
+        // Set a specific render order - don't let three.js sort things for us.
+        this.meshes.grass.renderOrder = 10;
+        this.meshes.grass.rotation.x = -Math.PI/2;
+        this._v = Terra_Vec.Vec2.create(0.0, 0.0);
+        this.scene.add(this.meshes.grass);
+        
 
         // Terrain mesh
         this.terra = Terra_Terrain.Terrain({
@@ -187,9 +220,9 @@ export class Terra_World {
             r: Math.PI / 10,
         };
 
-        this.wm = new Terra_Water();
-        this.water = this.wm.createWater(this.scene, this.WATER_LEVEL);
-        this.scene.add(this.water);
+        this.terraWater = new Terra_Water();
+        this.meshes.water = this.terraWater.createWater(this.scene, this.WATER_LEVEL);
+        this.scene.add(this.meshes.water );
 
         Terra_Input.setWheelListener(
             "wlOne",
@@ -307,11 +340,9 @@ export class Terra_World {
             this.updateFade(dt);
         }
 
-        this.wm.update();
-
         this.simT += dt;
 
-        let t = this.simT * 0.001;
+        let nTime = this.simT * 0.001;
 
         // Move player (viewer)
         this.player.update(dt);
@@ -359,6 +390,20 @@ export class Terra_World {
         this.camHolder.rotation.y = -pyaw;
         this.camera.rotation.x = ppitch;
 
+        // Update grass.
+        // Here we specify the centre position of the square patch to
+        // be drawn. That would be directly in front of the camera, the
+        // distance from centre to edge of the patch.
+        
+        let drawPos = this._v;
+        Terra_Vec.Vec2.set(drawPos,
+			ppos.x + Math.cos(pyaw) * this.GRASS_PITCH_RADIUS,
+			ppos.y + Math.sin(pyaw) * this.GRASS_PITCH_RADIUS
+		)
+		this.grass.update(this.meshes.grass, nTime, ppos, pdir, ppos)
+        
+        //this.grass.update(this.meshes.grass, nTime, null, this.camHolder.rotation, ppos);
+        
         // Update sun glare effect
         // not really used
         this.updateGlare();

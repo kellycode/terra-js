@@ -16,8 +16,10 @@ export class Terra_App {
             laptop: { blades: 40000, depth: 65.0, antialias: false },
             desktop: { blades: 84000, depth: 85.0, antialias: true },
             desktop2: { blades: 250000, depth: 125.0, antialias: true },
-            gamerig: { blades: 500000, depth: 175.0, antialias: true },
+            gamerig: { blades: 500000, depth: 200.0, antialias: true },
         };
+
+        this.CONFIGS.gamerig
 
         // DOM element containing canvas
         this.container = document.getElementById("app_canvas_container");
@@ -131,9 +133,9 @@ export class Terra_App {
                     { name: "terrain1", url: "data/terrain1.jpg" },
                     { name: "terrain2", url: "data/terrain2.jpg" },
                     { name: "skydome", url: "data/skydome.jpg" },
-                    { name: "skyenv", url: "data/skyenv.jpg" },
+                    { name: "skyenv", url: "data/skyenv.jpg" }
                 ],
-                models: [{ name: "tree", url: "models/oak_tree.glb" }],
+                models: [],
             },
             onAssetsLoaded,
             onAssetsProgress,
@@ -155,7 +157,9 @@ export class Terra_App {
             this.assets,
             this.displayWidth,
             this.displayHeight,
-            antialias
+            antialias,
+            500000, // NUM_GRASS_BLADES
+            300 // GRASS_PITCH_RADIUS
         );
 
         // Start our animation loop

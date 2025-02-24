@@ -68,6 +68,7 @@ export class Terra_Loader {
                     this.doProgress();
                 } else {
                     this.doError("Error " + req.status + " loading " + ad.url);
+                    console.log(req);
                 }
             }
         };
@@ -124,7 +125,8 @@ export class Terra_Loader {
     }
 
     static doError(e) {
-        this.error_callback(e);
+        console.log(e);
+        //this.error_callback(e);
         this.numFailed += 1;
         this.tryDone();
     }
