@@ -14,6 +14,10 @@ export class Terra_Terrain_Fake {
         this.HEIGHT_MAP = assets.images["heightmap"];
         this.TEXTURE_REPEAT = 10;
 
+        // Terra_Terrain cellSize * (xCellCount + 1) = 3086.685
+        // why the weird cellSize  of 14.6985
+        // this.HEIGHTFIELD_SIZE = 3072.0;
+        // this.HEIGHTFIELD_HEIGHT = 180.0;
         this.GROUND_SIZE = 3050;
         this.GROUND_Y = 0;
         // scale the terrain height
