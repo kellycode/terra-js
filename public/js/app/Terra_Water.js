@@ -19,9 +19,9 @@ export class Terra_Water {
     // Create Water Mesh
     createWater(scene, waterLevel) {
         const params = {
-            color: "#caf0fe",
+            color: "#bbbbff",
             scale: 2,
-            flowX: 0.1,
+            flowX: 0.3,
             flowY: 0.1,
         };
 
@@ -33,7 +33,7 @@ export class Terra_Water {
             flowDirection: new THREE.Vector2(params.flowX, params.flowY),
             textureWidth: 1024,
             textureHeight: 1024,
-            reflectivity: 0.75,
+            reflectivity: 0.10,
         });
 
         this.water.position.x = this.waterConfig.x;
