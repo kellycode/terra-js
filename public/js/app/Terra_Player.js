@@ -34,7 +34,7 @@ export class Terra_Player {
         this.ROLL_RESIST = 10.0;
         this.ROLL_FRIC = 8.0;
         this.MAN_VEL = 100.0;
-        this.MAN_ZVEL = 10.0;
+        this.MAN_ZVEL = 50.0;
         this.MAN_YAWVEL = 0.5;
         this.MAN_PITCHVEL = 1.0;
         this.MAN_MAXPITCH = Math.PI / 4.0;
@@ -91,6 +91,7 @@ export class Terra_Player {
     // Manual movement
     updateManual(input, dt) {
         let ft = dt / 1000.0;
+        let fts = dt / 500.0;
         let maxPitch = 0.3;
 
 

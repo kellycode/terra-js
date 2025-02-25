@@ -1,5 +1,9 @@
 import * as THREE from "three";
 
+// Terra_Heightfield infoAt stopped working when I rotated
+// the terrain to y up so made a duplicate mesh not glsl
+// to easily get height at a point
+
 export class Terra_Terrain_Fake {
     constructor(scene, assets) {
         this.scene = scene;
