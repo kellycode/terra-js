@@ -4,8 +4,8 @@ import * as THREE from "three";
 // the terrain to y up so made a duplicate mesh not glsl
 // to easily get height at a point
 
-export class Terra_Terrain_Fake {
-    constructor(scene, assets) {
+export class Terra_Terrain_Body {
+    constructor(scene, assets, heightfieldSize) {
         this.scene = scene;
         this.assets = assets;
 
@@ -18,7 +18,7 @@ export class Terra_Terrain_Fake {
         // why the weird cellSize  of 14.6985
         // this.HEIGHTFIELD_SIZE = 3072.0;
         // this.HEIGHTFIELD_HEIGHT = 180.0;
-        this.GROUND_SIZE = 3050;
+        this.groundSize = heightfieldSize;
         this.GROUND_Y = 0;
         // scale the terrain height
         this.TERRAIN_HEIGHT_MOD = 0.71;
@@ -56,8 +56,8 @@ export class Terra_Terrain_Fake {
          * the segments and that number is sent back with the pixel data
          */
         this.GROUND_DATA.GEOMETRY = new THREE.PlaneGeometry(
-            this.GROUND_SIZE,
-            this.GROUND_SIZE,
+            this.groundSize,
+            this.groundSize,
             this.terrain.segments,
             this.terrain.segments
         );
@@ -237,7 +237,7 @@ export class Terra_Terrain_Fake {
             DLIGHT_SHADOW_BL: -5000,
             DLIGHT_SHADOW_MAPSIZE: 2048,
             DLIGHT_SHADOW_NEAR: 0.5,
-            DLIGHT_SHADOW_FAR: this.GROUND_SIZE * 2
+            DLIGHT_SHADOW_FAR: this.groundSize * 2
         };
 
         //  low evening light

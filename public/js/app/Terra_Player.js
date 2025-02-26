@@ -127,7 +127,7 @@ export class Terra_Player {
 
         let castFrom = new THREE.Vector3(this.state.pos.x, this.state.pos.y + 100, this.state.pos.z);
         this.raycaster.set(castFrom, this.DOWN_VECTOR);
-        let intersects = this.raycaster.intersectObject(this.world.f_terrain.GROUND_DATA.MESH);
+        let intersects = this.raycaster.intersectObject(this.world.terrainBody.GROUND_DATA.MESH);
 
         if (intersects.length > 0) {
             if(intersects[0].object.name === "fake_ground") {
@@ -141,7 +141,7 @@ export class Terra_Player {
         } else if (this.state.pos.y > this.MAX_HEIGHT) {
             this.state.pos.y = this.MAX_HEIGHT;
         } else {
-            this.state.pos.y =  this.groundHeight + 10;
+            //this.state.pos.y =  this.groundHeight + 10;
         }
     }
 }

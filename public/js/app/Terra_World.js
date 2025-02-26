@@ -11,12 +11,13 @@ import { Terra_Input } from "./Terra_Input.js";
 import { Terra_Skydome } from "./Terra_Skydome.js";
 import { Terra_Heightfield } from "./Terra_Heightfield.js";
 import { Terra_Terrain } from "./Terra_Terrain.js";
+import { Terra_Terrain_Body } from "./Terra_Terrain_Body.js"
 import { Terra_Terramap } from "./Terra_Terramap.js";
 import { Terra_Water } from "./Terra_Water.js";
 import { Terra_FPS } from "./Terra_FPS.js";
 import { Terra_Player } from "./Terra_Player.js";
 import { Terra_Grass } from "./Terra_Grass.js";
-import { Terra_Terrain_Fake } from "./Terra_Terrain_Fake.js"
+
 
 export class Terra_World {
     // Create a World instance
@@ -41,13 +42,13 @@ export class Terra_World {
         this.WATER_COLOR = Terra_Vec.Color.create(0.6, 0.7, 0.85);
         this.WIND_DEFAULT = 1.5;
         this.WIND_MAX = 3.0;
+
         this.MAX_GLARE = 0.25; // max glare effect amount
-        
         this.GLARE_RANGE = 1.1; // angular range of effect
         this.GLARE_YAW = Math.PI * 1.5; // yaw angle when looking directly at sun
         this.GLARE_PITCH = 0.2; // pitch angle looking at sun
         this.GLARE_COLOR = Terra_Vec.Color.create(1.0, 0.8, 0.4);
-        this.INTRO_FADE_DUR = 500;
+        this.INTRO_FADE_DUR = 2000;
 
         this.canvas = document.getElementById("app_canvas");
 
@@ -136,7 +137,7 @@ export class Terra_World {
         this.scene.add(this.meshes.terrain);
 
 
-        this.f_terrain = new Terra_Terrain_Fake(this.scene, assets);
+        this.terrainBody = new Terra_Terrain_Body(this.scene, assets, this.HEIGHTFIELD_SIZE);
         
 
         // GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS GRASS
@@ -189,13 +190,14 @@ export class Terra_World {
                 color: 0x000000,
                 fog: false,
                 transparent: true,
-                opacity: 1.0,
-                depthTest: false,
+                opacity: 0.5,
+                depthTest: true,
                 depthWrite: false,
+                side: THREE.DoubleSide
             })
         );
-        this.meshes.fade.position.x = 2.0; // place directly in front of camera
-        this.meshes.fade.rotation.y = Math.PI * 1.5;
+        this.meshes.fade.position.z = -2.0; // place directly in front of camera
+        this.meshes.fade.rotation.y = Math.PI;
         this.meshes.fade.renderOrder = 10;
         this.camHolder.add(this.meshes.fade);
         this.camHolder.renderOrder = 100;
@@ -208,15 +210,16 @@ export class Terra_World {
                 color: Terra_Vec.Color.to24bit(this.GLARE_COLOR),
                 fog: false,
                 transparent: true,
-                opacity: 0.0,
-                depthTest: false,
+                opacity: 0.5,
+                depthTest: true,
                 depthWrite: false,
                 blending: THREE.AdditiveBlending,
+                side: THREE.DoubleSide
             })
         );
-        this.meshes.sunFlare.position.x = 2.05;
-        this.meshes.sunFlare.rotation.z = Math.PI * 1.5;
-        this.meshes.sunFlare.visible = true;
+        this.meshes.sunFlare.position.z = -2.00;
+        this.meshes.sunFlare.rotation.y = Math.PI;
+        this.meshes.sunFlare.visible = false;
         this.meshes.sunFlare.renderOrder = 20;
         this.camHolder.add(this.meshes.sunFlare);
 
@@ -261,16 +264,16 @@ export class Terra_World {
         );
 
         Terra_Input.setKeyPressListener(
-            107,
+            107, // + in the numeric keypad
             function () {
-                this.cameraPosition.x += 1;
+                this.camera.position.z += 5;
             }.bind(this)
         );
 
         Terra_Input.setKeyPressListener(
-            109,
+            109, // - in the numeric keypad
             function () {
-                this.cameraPosition.x -= 1;
+                this.camera.position.z -= 5;
             }.bind(this)
         );
 
@@ -355,7 +358,7 @@ export class Terra_World {
             this.updateFade(dt);
         }
 
-        //this.f_terrain.GROUND_DATA.MESH.position.y -= 0.01;
+        //this.terrainBody.GROUND_DATA.MESH.position.y -= 0.01;
 
         this.simT += dt;
 
@@ -423,16 +426,15 @@ export class Terra_World {
 
     // Update how much glare effect by how much we're looking at the sun
     updateGlare() {
-        this.GLARE_PITCH += 0.1;
-        let dy = Math.abs(Terra_Math.difAngle(this.GLARE_YAW, this.player.state.roll));
-        let dp = Math.abs(Terra_Math.difAngle(this.GLARE_PITCH, this.player.state.roll)) * 1.75;
+        let dy = Math.abs(Terra_Math.difAngle(this.GLARE_YAW, this.player.state.yaw));
+        let dp = Math.abs(Terra_Math.difAngle(this.GLARE_PITCH, this.player.state.pitch)) * 1.75;
         let sunVisAngle = Math.sqrt(dy * dy + dp * dp);
         if (sunVisAngle < this.GLARE_RANGE) {
             let glare = this.MAX_GLARE * Math.pow((this.GLARE_RANGE - sunVisAngle) / (1.0 + this.MAX_GLARE), 0.75);
             this.meshes.sunFlare.material.opacity = Math.max(0.0, glare);
             this.meshes.sunFlare.visible = true;
         } else {
-            this.meshes.sunFlare.visible = true;
+            this.meshes.sunFlare.visible = false;
         }
     }
 
@@ -445,7 +447,7 @@ export class Terra_World {
             this.meshes.fade.visible = false;
         } else {
             // update fade opacity
-            mat.opacity = 1.0 - Math.pow(this.simT / this.INTRO_FADE_DUR, 2.0);
+            mat.opacity = 0.5 - Math.pow(this.simT / this.INTRO_FADE_DUR, 2.0);
         }
     }
 
