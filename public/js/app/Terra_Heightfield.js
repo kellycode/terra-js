@@ -53,6 +53,7 @@ export class Terra_Heightfield {
         hf.ySize = hf.yCount * hf.cellSize;
         // Draw to a canvas so we can get the data
         var canvas = document.createElement('canvas');
+        //document.body.appendChild(canvas);
         canvas.width = w;
         canvas.height = h;
         var ctx = canvas.getContext('2d');

@@ -69,7 +69,11 @@ export class Terra_Grass {
 
         Terra_Vec.Vec3.normalize(lightDir, lightDir);
         // Fill in some constants that never change between draw calls
-        let vertScript = opts.vertScript.replace('%%BLADE_HEIGHT_TALL%%', (this.BLADE_HEIGHT_MAX * 1.5).toFixed(1)).replace('%%BLADE_SEGS%%', this.BLADE_SEGS.toFixed(1)).replace('%%PATCH_SIZE%%', (opts.radius * 2.0).toFixed(1)).replace('%%TRANSITION_LOW%%', opts.transitionLow.toString()).replace('%%TRANSITION_HIGH%%', opts.transitionHigh.toString());
+        let vertScript = opts.vertScript.replace('%%BLADE_HEIGHT_TALL%%', (this.BLADE_HEIGHT_MAX * 1.5).toFixed(1))
+            .replace('%%BLADE_SEGS%%', this.BLADE_SEGS.toFixed(1))
+            .replace('%%PATCH_SIZE%%', (opts.radius * 2.0).toFixed(1))
+            .replace('%%TRANSITION_LOW%%', opts.transitionLow.toString())
+            .replace('%%TRANSITION_HIGH%%', opts.transitionHigh.toString());
         // Setup shader
         let mat = new THREE.RawShaderMaterial({
             uniforms: {

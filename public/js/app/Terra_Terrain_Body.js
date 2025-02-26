@@ -114,9 +114,6 @@ export class Terra_Terrain_Body {
         this.GROUND_DATA.MESH.visible = false;
         this.scene.add(this.GROUND_DATA.MESH);
 
-        // not used atm but a way to get an image from a canvas for a material
-        // /this.pattern = this.getTexturePatternImage(this.GROUND_DATA, "pattern_canvas");
-
         this.initLights();
     }
 
