@@ -43,7 +43,7 @@ export class Terra_World {
         this.WIND_DEFAULT = 1.5;
         this.WIND_MAX = 3.0;
 
-        this.MAX_GLARE = 0.25; // max glare effect amount
+        this.MAX_GLARE = 0.15; // max glare effect amount
         this.GLARE_RANGE = 1.1; // angular range of effect
         this.GLARE_YAW = Math.PI * 1.5; // yaw angle when looking directly at sun
         this.GLARE_PITCH = 0.2; // pitch angle looking at sun
@@ -416,11 +416,11 @@ export class Terra_World {
 			ppos.y + Math.sin(pyaw) * this.GRASS_PITCH_RADIUS
 		)
 		this.grass.update(this.meshes.grass, nTime, ppos, pdir, ppos)
-        
-        //this.grass.update(this.meshes.grass, nTime, null, this.camHolder.rotation, ppos);
-        
+
+        // why does the terrain need update
+        Terra_Terrain.update(this.terra, ppos.x, ppos.y)
+               
         // Update sun glare effect
-        // not really used
         this.updateGlare();
     }
 
